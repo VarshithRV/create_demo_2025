@@ -1,0 +1,40 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/barracuda/catkin_ws/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/barracuda/catkin_ws/src/actionlib_tutorials/include/**",
+        "/home/barracuda/catkin_ws/src/Azure_Kinect_ROS_Driver/include/**",
+        "/home/barracuda/catkin_ws/src/beginner_tutorials/include/**",
+        "/home/barracuda/catkin_ws/src/llm_manipulator_integration/bringup/include/**",
+        "/home/barracuda/catkin_ws/src/llm_manipulator_integration/central_client/include/**",
+        "/home/barracuda/catkin_ws/src/control_panel_plugin/include/**",
+        "/home/barracuda/catkin_ws/src/create_demo_2025/include/**",
+        "/home/barracuda/catkin_ws/src/darknet_ros/darknet_ros/include/**",
+        "/home/barracuda/catkin_ws/src/llm_manipulator_integration/deprojection_pipeline/include/**",
+        "/home/barracuda/catkin_ws/src/llm_manipulator_integration/deprojection_pipeline_msgs/include/**",
+        "/home/barracuda/catkin_ws/src/icra_perception/include/**",
+        "/home/barracuda/catkin_ws/src/kinematics_tutorials/include/**",
+        "/home/barracuda/catkin_ws/src/llm_manipulator_integration/mmsg_sdk/include/**",
+        "/home/barracuda/catkin_ws/src/llm_manipulator_integration/motion_planning_server/include/**",
+        "/home/barracuda/catkin_ws/src/llm_manipulator_integration/motion_planning_server_msgs/include/**",
+        "/home/barracuda/catkin_ws/src/moveit_cpp_tutorials/include/**",
+        "/home/barracuda/catkin_ws/src/pid_control_sut06/include/**",
+        "/home/barracuda/catkin_ws/src/project_fly/include/**",
+        "/home/barracuda/catkin_ws/src/tf2_tutorials/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

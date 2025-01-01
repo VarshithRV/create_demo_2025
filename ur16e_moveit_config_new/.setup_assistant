@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: ""
+    relative_path: /home/barracuda/ur16e.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/ur16e_robot.srdf
+  CONFIG:
+    author_name: Varshith R V
+    author_email: vrv278@gmail.com
+    generated_timestamp: 1735712470

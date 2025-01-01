@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="dual_arm_ur16e">
+
+  <!--Load the macro for creating a robot-->
+
+  <xacro:include filename="$(find ur_description)/urdf/inc/ur16e_macro.xacro"/>
+
+  <!--Instanciate the robots-->
+
+  <xacro:ur16e_robot prefix="left_" kinematics_parameters_file="$(find ur_description)/config/ur16e/default_kinematics.yaml"/>
+
+  <xacro:ur16e_robot prefix="right_" kinematics_parameters_file="$(find ur_description)/config/ur16e/default_kinematics.yaml"/>
+
+
+  <!--common link where the tf tree originates from-->
+
+  <link name="world"/>
+
+
+  <!--Define the robot poses in the world-->
+
+  <joint name="world_to_left" type="fixed">
+
+    <parent link="world" />
+
+    <child link = "left_base_link" />
+
+    <origin xyz="-0.5 0 0" rpy="0 0 0" />
+
+  </joint>
+
+  <joint name="world_to_right" type="fixed">
+
+    <parent link="world" />
+
+    <child link = "right_base_link" />
+
+    <origin xyz="0.5 0 0" rpy="0 0 0" />
+
+  </joint>
+
+</robot>

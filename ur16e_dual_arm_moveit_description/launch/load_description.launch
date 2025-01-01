@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="right_kinematics" default="$(find ur_description)/config/ur16e/default_kinematics.yaml"/>
+  <arg name="left_kinematics" default="$(find ur_description)/config/ur16e/default_kinematics.yaml"/>
+  <param name="robot_description" command="$(find xacro)/xacro '$(find ur16e_dual_arm_moveit_description)/urdf/dual_arm.xacro'
+   left_kinematics:=$(arg left_kinematics)
+   right_kinematics:=$(arg right_kinematics)
+  "/>
+</launch>
