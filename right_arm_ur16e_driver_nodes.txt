@@ -1,0 +1,7 @@
+/right_arm/controller_stopper
+/right_arm/robot_state_publisher
+/right_arm/ros_control_controller_spawner
+/right_arm/ros_control_stopped_spawner
+/right_arm/ur_hardware_interface
+/right_arm/ur_hardware_interface/ur_robot_state_helper
+/rosout
