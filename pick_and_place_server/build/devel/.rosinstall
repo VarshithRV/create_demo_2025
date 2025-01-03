@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/barracuda/ros_ws/src/moveit_tutorials/build/devel/setup.sh

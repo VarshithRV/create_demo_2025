@@ -1,0 +1,5 @@
+geometry_msgs/PoseStamped source
+geometry_msgs/PoseStamped destination
+---
+bool result
+---

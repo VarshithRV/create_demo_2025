@@ -6,5 +6,6 @@
     "python.analysis.extraPaths": [
         "/home/barracuda/catkin_ws/devel/lib/python3/dist-packages",
         "/opt/ros/noetic/lib/python3/dist-packages"
-    ]
+    ],
+    "cmake.ignoreCMakeListsMissing": true
 }
