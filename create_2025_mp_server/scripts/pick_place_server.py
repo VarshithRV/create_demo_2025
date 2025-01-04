@@ -10,7 +10,7 @@ from moveit_commander.conversions import pose_to_list
 from geometry_msgs.msg import PointStamped, Pose, PoseStamped
 from tf.transformations import quaternion_from_euler, quaternion_multiply
 from std_srvs.srv import SetBool
-from pick_and_place_server_msgs.msg import PickPlaceAction, PickPlaceActionGoal, PickPlaceActionResult
+from create_2025_mp_server_msgs.msg import PickPlaceAction, PickPlaceActionGoal, PickPlaceActionResult
 import actionlib
 
 
@@ -57,7 +57,7 @@ class Motion_planner:
 
         # create action server for pick and place
         self.pick_place_server = actionlib.SimpleActionServer(
-            "left_pick_place", PickPlaceAction, self.pick_place_callback, auto_start=False
+            "pick_place", PickPlaceAction, self.pick_place_callback, auto_start=False
         )
 
         self.pick_place_server.start()
@@ -176,7 +176,7 @@ class Motion_planner:
         return True
         
 if __name__  == "__main__":
-    rospy.init_node("left_pick_place_server", anonymous=True)
+    rospy.init_node("pick_place_server", anonymous=True)
     mp = Motion_planner()
     rospy.spin()
     moveit_commander.roscpp_shutdown()

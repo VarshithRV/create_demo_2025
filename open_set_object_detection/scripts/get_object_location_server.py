@@ -20,7 +20,7 @@ import bisect
 ####### model parameters threshold ########
 BOX_THRESHOLD = 0.35
 TEXT_THRESHOLD = 0.25
-TEXT_PROMPT = "face"
+TEXT_PROMPT = "green_shape, red_shape, blue_shape"
 ######################################
 
 
@@ -40,17 +40,17 @@ class Deprojection:
 
         # Subscribers
         self.depth_image_sub = rospy.Subscriber(
-                                                "/depth_to_rgb/image", 
+                                                "/camera/aligned_depth_to_color/image_raw", 
                                                 Image, 
                                                 self.depth_image_callback
                                                 )
         self.camera_info_sub = rospy.Subscriber(
-                                                "/rgb/camera_info", 
+                                                "/camera/aligned_depth_to_color/camera_info", 
                                                 CameraInfo, 
                                                 self.camera_info_callback
                                                 )
         self.color_image_sub = rospy.Subscriber(
-                                                "/rgb/image_raw",
+                                                "/camera/color/image_raw",
                                                 Image,
                                                 self.color_image_callback
                                                 )

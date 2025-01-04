@@ -10,9 +10,15 @@ from moveit_commander.conversions import pose_to_list
 from geometry_msgs.msg import PointStamped, Pose, PoseStamped
 from tf.transformations import quaternion_from_euler, quaternion_multiply
 from std_srvs.srv import SetBool
-from pick_and_place_server_msgs.msg import PickPlaceAction, PickPlaceActionGoal, PickPlaceActionResult
+from create_2025_mp_server_msgs.msg import PickPlaceAction, PickPlaceActionGoal, PickPlaceActionResult
 import actionlib
+from ur_msgs.srv import SetIO
 
+### CREATE X Y Z LITERALS FOR PADDING between end effector ###
+PADDING_X = 0.0
+PADDING_Y = 0.0
+PADDING_Z = 0.0
+#########################################
 
 class Motion_planner:
 
@@ -50,16 +56,16 @@ class Motion_planner:
             queue_size=20,
         )
 
-        # self.gripper_client = rospy.ServiceProxy("gripper", SetBool)
-
-        self.pre_action_joint_state = [0, -tau/8, 0, -tau/4, 0, tau/6, 0]
         self.waypoints = []
 
         # create action server for pick and place
         self.pick_place_server = actionlib.SimpleActionServer(
-            "pick_place", PickPlaceAction, self.pick_place_callback, auto_start=False
+            "left_pick_place", PickPlaceAction, self.pick_place_callback, auto_start=False
         )
 
+        # create a service client for /left/ur_hardware_interface/set_io
+        self.set_io_client = rospy.ServiceProxy("/left/ur_hardware_interface/set_io", SetIO)
+        self.set_io_client.wait_for_service()
         self.pick_place_server.start()
 
 
@@ -84,12 +90,31 @@ class Motion_planner:
     def pick_and_place(self,start:PoseStamped, end:PoseStamped):
         rospy.loginfo("Started pick and place with start : %s and end : %s", start, end)
 
+        start.pose.position.x += PADDING_X
+        start.pose.position.y += PADDING_Y
+        start.pose.position.z += PADDING_Z
+
+        end.pose.position.x += PADDING_X
+        end.pose.position.y += PADDING_Y
+        end.pose.position.z += PADDING_Z
+
+        start.pose.orientation.x= -0.35862806853220586
+        start.pose.orientation.y= -0.9334403528397598
+        start.pose.orientation.z= -0.0036593492588516663
+        start.pose.orientation.w= 0.007850179249297016
+
+
+        end.pose.orientation.x= -0.35862806853220586
+        end.pose.orientation.y= -0.9334403528397598
+        end.pose.orientation.z= -0.0036593492588516663
+        end.pose.orientation.w= 0.007850179249297016
+
         # plan a cartesian path to pick, prepick -> pick
         waypoints = []
         initial_pose = self.move_group.get_current_pose().pose
         prepick = Pose()
         prepick = start.pose
-        prepick.position.z += 0.1 + 0.11# move up 10 cm
+        prepick.position.z += 0.1# move up 10 cm
         waypoints.append(copy.deepcopy(initial_pose))
         waypoints.append(copy.deepcopy(prepick))
         
@@ -124,9 +149,17 @@ class Motion_planner:
             print(e)
             return False
 
-        # activate the gripper here
+        rospy.sleep(1)
 
-        rospy.sleep(0.3)
+        # activate the gripper here
+        rospy.loginfo("Activating gripper")
+        try : 
+            self.set_io_client(1, 12, 1)
+            self.set_io_client(1, 13, 1)
+        except Exception as e:
+            print(e)
+            return
+        rospy.sleep(1)
 
         # plan cartesian path to prepick -> place
         waypoints = []
@@ -135,7 +168,7 @@ class Motion_planner:
         waypoints.append(copy.deepcopy(prepick))
         preplace = Pose()
         preplace = end.pose
-        preplace.position.z += 0.15 + 0.11
+        preplace.position.z += 0.15
         waypoints.append(copy.deepcopy(preplace))
         place = copy.deepcopy(preplace)
         place.position.z -= 0.15
@@ -160,6 +193,7 @@ class Motion_planner:
         display_trajectory.trajectory.append(plan)
         self.display_trajectory_publisher.publish(display_trajectory)
 
+
         # execute the plan
         rospy.loginfo("Executing prepick -> place plan")
         try : 
@@ -169,14 +203,22 @@ class Motion_planner:
             print(e)
             return False
 
+        rospy.sleep(2)
+        
         # deactivate the gripper here
         waypoints = []
         rospy.loginfo("Deactivating gripper")
+        try : 
+            self.set_io_client(1, 12, 0)
+            self.set_io_client(1, 13, 0)
+        except Exception as e:
+            print(e)
+            return
 
         return True
         
 if __name__  == "__main__":
-    rospy.init_node("pick_place_server", anonymous=True)
+    rospy.init_node("left_pick_place_server", anonymous=True)
     mp = Motion_planner()
     rospy.spin()
     moveit_commander.roscpp_shutdown()
