@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: deprojection_pipeline_msgs
+Description: Description of deprojection_pipeline_msgs
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: geometry_msgs roscpp rospy message_runtime

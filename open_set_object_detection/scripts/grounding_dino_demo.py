@@ -1,13 +1,16 @@
 from groundingdino.util.inference import load_model, load_image, predict, annotate
 import cv2
+import os
 
 model = load_model("groundingdino/config/GroundingDINO_SwinT_OGC.py", "weights/groundingdino_swint_ogc.pth")
-IMAGE_PATH = "weights/dog-3.jpeg"
-TEXT_PROMPT = "chair . person . dog ."
+IMAGE_PATH = "assets/test_image_1.jpeg"
+TEXT_PROMPT = "shapes"
 BOX_TRESHOLD = 0.35
 TEXT_TRESHOLD = 0.25
 
-image_source, image = load_image(IMAGE_PATH)
+image = cv2.imread(IMAGE_PATH)
+
+image_source, image = load_image(image)
 
 boxes, logits, phrases = predict(
     model=model,
@@ -18,4 +21,20 @@ boxes, logits, phrases = predict(
 )
 
 annotated_frame = annotate(image_source=image_source, boxes=boxes, logits=logits, phrases=phrases)
-cv2.imwrite("annotated_image.jpg", annotated_frame)
+
+print("########################")
+print("\nBoxes : ")
+print(boxes, type(boxes))
+print("\n")
+
+print("########################")
+print("\nLogits : ")
+print(logits, type(logits))
+print("\n")
+
+print("########################")
+print("\nPhrases : ")
+print(phrases, type(phrases))
+print("\n")
+
+cv2.imwrite("inference_images/annotated_image.jpg", annotated_frame)

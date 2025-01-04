@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/barracuda/catkin_ws/src/deprojection_pipeline_msgs/build/devel/setup.sh
