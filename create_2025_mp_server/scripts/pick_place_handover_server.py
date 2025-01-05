@@ -24,25 +24,7 @@ PADDING_Z = 0.0
 #########################################
 
 #### handover pose defn ####
-handover_pose_left = PoseStamped()
-handover_pose_left.header.frame_id = "world"
-handover_pose_left.pose.position.x = 0.5
-handover_pose_left.pose.position.y = 0.0
-handover_pose_left.pose.position.z = 0.5
-handover_pose_left.pose.orientation.x = 0.0
-handover_pose_left.pose.orientation.y = 0.0
-handover_pose_left.pose.orientation.z = 0.0
-handover_pose_left.pose.orientation.w = 1.0
 
-handover_pose_right = PoseStamped()
-handover_pose_right.header.frame_id = "world"
-handover_pose_right.pose.position.x = 0.5
-handover_pose_right.pose.position.y = 0.0
-handover_pose_right.pose.position.z = 0.5
-handover_pose_right.pose.orientation.x = 0.0
-handover_pose_right.pose.orientation.y = 0.0
-handover_pose_right.pose.orientation.z = 0.0
-handover_pose_right.pose.orientation.w = 1.0
 
 ##############################################
 
@@ -111,7 +93,7 @@ class Motion_planner:
 
         # create action server for pick and place
         self.pick_place_server = actionlib.SimpleActionServer(
-            "pick_place_thin_slot", PickPlaceAction, self.pick_place_callback, auto_start=False
+            "pick_place_handover", PickPlaceAction, self.pick_place_callback, auto_start=False
         )
 
         
@@ -141,42 +123,7 @@ class Motion_planner:
         else:
             self.pick_place_server.set_aborted(result)
 
-
-    def pick_and_place(self,start:PoseStamped, end:PoseStamped):
-        rospy.loginfo("Started pick and place with start : %s and end : %s", start, end)
-
-        start.pose.position.x += PADDING_X
-        start.pose.position.y += PADDING_Y
-        start.pose.position.z += PADDING_Z
-
-        end.pose.position.x += PADDING_X
-        end.pose.position.y += PADDING_Y
-        end.pose.position.z += PADDING_Z
-
-        start.pose.orientation.x= -0.35862806853220586
-        start.pose.orientation.y= -0.9334403528397598
-        start.pose.orientation.z= -0.0036593492588516663
-        start.pose.orientation.w= 0.007850179249297016
-
-
-        end.pose.orientation.x= -0.35862806853220586
-        end.pose.orientation.y= -0.9334403528397598
-        end.pose.orientation.z= -0.0036593492588516663
-        end.pose.orientation.w= 0.007850179249297016
-
-        # plan a cartesian path for right to pick, prepick -> pick
-        waypoints = []
-        initial_pose = self.move_group_right.get_current_pose().pose
-        prepick = Pose()
-        prepick = start.pose
-        prepick.position.z += 0.2# move up 20 cm
-        waypoints.append(copy.deepcopy(initial_pose))
-        waypoints.append(copy.deepcopy(prepick))
-        
-        pick = copy.deepcopy(prepick)
-        pick.position.z -= 0.2 # move down 20 cm
-        waypoints.append(copy.deepcopy(pick))
-
+    def execute_waypoint_right(self,waypoints : list):
         rospy.loginfo("#################################")
         rospy.loginfo("Waypoints for right arm current to pick: %s", waypoints)
         # plan a cartesian path for right
@@ -203,7 +150,64 @@ class Motion_planner:
         except Exception as e:
             print(e)
             return False
+        
+    def execute_waypoint_left(self,waypoints : list):
+        rospy.loginfo("#################################")
+        rospy.loginfo("Waypoints for right arm current to pick: %s", waypoints)
+        # plan a cartesian path for right
+        try : 
+            (plan, fraction) = self.move_group_left.compute_cartesian_path(
+                waypoints,  # waypoints to follow
+                0.005,  # eef_step
+            )
+        except Exception as e:
+            print(e)
+            return False
 
+        # display the plan for right
+        display_trajectory = moveit_msgs.msg.DisplayTrajectory()
+        display_trajectory.trajectory_start = self.robot.get_current_state()
+        display_trajectory.trajectory.append(plan)
+        self.display_trajectory_publisher.publish(display_trajectory)
+
+        # execute the plan for right
+        rospy.loginfo("Executing prepick -> pick plan")
+        try : 
+            self.move_group_left.execute(plan, wait=True)
+            self.move_group_left.stop()
+        except Exception as e:
+            print(e)
+            return False
+
+    def pick_and_place(self,start:PoseStamped, end:PoseStamped):
+        rospy.loginfo("Started pick and place with start : %s and end : %s", start, end)
+
+        start.pose.position.x += PADDING_X
+        start.pose.position.y += PADDING_Y
+        start.pose.position.z += PADDING_Z
+
+        end.pose.position.x += PADDING_X
+        end.pose.position.y += PADDING_Y
+        end.pose.position.z += PADDING_Z
+
+        start.pose.orientation.x= -0.35862806853220586
+        start.pose.orientation.y= -0.9334403528397598
+        start.pose.orientation.z= -0.0036593492588516663
+        start.pose.orientation.w= 0.007850179249297016
+        end.pose.orientation.x= -0.35862806853220586
+        end.pose.orientation.y= -0.9334403528397598
+        end.pose.orientation.z= -0.0036593492588516663
+        end.pose.orientation.w= 0.007850179249297016
+
+        # plan a cartesian path for right to pick, prepick -> pick
+        waypoints = []
+        initial_pose = self.move_group_right.get_current_pose().pose
+        prepick = Pose()
+        prepick = start.pose
+        prepick.position.z += 0.2# move up 20 cm
+        waypoints.append(copy.deepcopy(initial_pose))
+        waypoints.append(copy.deepcopy(prepick))
+        self.execute_waypoint_right(waypoints)
 
         rospy.sleep(1)
 
@@ -213,42 +217,28 @@ class Motion_planner:
 
         rospy.sleep(1)
 
-
-        # plan cartesian path from prepick to handover pose for right
+        # pickup
         waypoints = []
         current_pose = self.move_group_right.get_current_pose().pose
         waypoints.append(copy.deepcopy(current_pose))
         waypoints.append(copy.deepcopy(prepick))
+        self.execute_waypoint_right(waypoints)
+
+
+
+        # pre handover sequence for right
+        waypoints = []
+        current_pose = self.move_group_right.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
         waypoints.append(copy.deepcopy(handover_pose_right.pose))
 
-        rospy.loginfo("#################################")
-        rospy.loginfo("Waypoints for right arm, pick to handover pose: %s", waypoints)
-
-        # plan a cartesian path for right
-        try :
-            (plan, fraction) = self.move_group_right.compute_cartesian_path(
-                waypoints,  # waypoints to follow
-                0.005,  # eef_step
-            )
-        except Exception as e:
-            print(e)
-            return False
+        self.execute_waypoint_right(waypoints)
         
-        # display the plan for right
-        display_trajectory = moveit_msgs.msg.DisplayTrajectory()
-        display_trajectory.trajectory_start = self.robot.get_current_state()
-        display_trajectory.trajectory.append(plan)
-        self.display_trajectory_publisher.publish(display_trajectory)
 
-        # execute the plan for right
-        rospy.loginfo("Executing prepick -> handover plan")
-        try :
-            self.move_group_right.execute(plan, wait=True)
-            self.move_group_right.stop()
-        except Exception as e:
-            print(e)
-            return False
-        
+
+
+
+
         # plan a cartesian path for left from current to pre handover to handover to prehandover
         waypoints = []
         current_pose = self.move_group_left.get_current_pose().pose

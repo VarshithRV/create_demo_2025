@@ -20,12 +20,12 @@ if __name__ == "__main__":
     rospy.init_node("motion_planning_client")
     mp = MpClass()
 
-    # rospy.loginfo("Sending move preaction goal to left arm")
-    # move_preaction_goal = MovePreactionActionGoal()
-    # mp.left_move_preaction_client.send_goal(move_preaction_goal)
-    # mp.left_move_preaction_client.wait_for_result()
-    # move_preaction_result = mp.left_move_preaction_client.get_result()
-    # print("Move preaction result : ", move_preaction_result.result)
+    rospy.loginfo("Sending move preaction goal to left arm")
+    move_preaction_goal = MovePreactionActionGoal()
+    mp.left_move_preaction_client.send_goal(move_preaction_goal)
+    mp.left_move_preaction_client.wait_for_result()
+    move_preaction_result = mp.left_move_preaction_client.get_result()
+    print("Move preaction result : ", move_preaction_result.result)
     
     rospy.loginfo("Sending move preaction goal to right arm")
     move_preaction_goal = MovePreactionActionGoal()

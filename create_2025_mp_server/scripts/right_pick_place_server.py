@@ -123,6 +123,35 @@ class Motion_planner:
         waypoints.append(copy.deepcopy(initial_pose))
         waypoints.append(copy.deepcopy(prepick))
         
+        rospy.loginfo("#################################")
+        rospy.loginfo("Waypoints : %s", waypoints)
+
+        # plan a cartesian path
+        try : 
+            (plan, fraction) = self.move_group.compute_cartesian_path(
+                waypoints,  # waypoints to follow
+                0.005,  # eef_step
+            )
+        except Exception as e:
+            print(e)
+            return False
+
+        # display the plan
+        display_trajectory = moveit_msgs.msg.DisplayTrajectory()
+        display_trajectory.trajectory_start = self.robot.get_current_state()
+        display_trajectory.trajectory.append(plan)
+        self.display_trajectory_publisher.publish(display_trajectory)
+
+        # execute the plan
+        rospy.loginfo("Executing prepick")
+        try : 
+            self.move_group.execute(plan, wait=True)
+            self.move_group.stop()
+        except Exception as e:
+            print(e)
+            return False
+
+        waypoints = []
         pick = copy.deepcopy(prepick)
         pick.position.z -= 0.2 # move down 20 cm
         waypoints.append(copy.deepcopy(pick))
@@ -172,9 +201,39 @@ class Motion_planner:
         # move up 20 cm
         preplace.position.z += 0.20
         waypoints.append(copy.deepcopy(preplace))
+        
+        rospy.loginfo("#################################")
+        rospy.loginfo("Waypoints : %s", waypoints)
+        
+        # plan a cartesian path
+        try : 
+            (plan, fraction) = self.move_group.compute_cartesian_path(
+                waypoints,  # waypoints to follow
+                0.005,  # eef_step
+            )
+        except Exception as e:
+            print(e)
+            return False
+
+        # display the plan
+        display_trajectory = moveit_msgs.msg.DisplayTrajectory()
+        display_trajectory.trajectory_start = self.robot.get_current_state()
+        display_trajectory.trajectory.append(plan)
+        self.display_trajectory_publisher.publish(display_trajectory)
+
+        # execute the plan
+        rospy.loginfo("Executing prepick -> place plan")
+        try : 
+            self.move_group.execute(plan, wait=True)
+            self.move_group.stop()
+        except Exception as e:
+            print(e)
+            return False
+        
+        waypoints = []
         place = copy.deepcopy(preplace)
         # move down 20 cm
-        place.position.z -= 0.15
+        place.position.z -= 0.20
         waypoints.append(copy.deepcopy(place))
 
         rospy.loginfo("#################################")
