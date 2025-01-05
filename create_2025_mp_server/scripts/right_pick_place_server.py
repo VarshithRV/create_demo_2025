@@ -14,6 +14,9 @@ from create_2025_mp_server_msgs.msg import PickPlaceAction, PickPlaceActionGoal,
 import actionlib
 from ur_msgs.srv import SetIO
 
+### variable bound for change
+# move up or down, set gripper value, time before activating gripper and moving
+
 ### CREATE X Y Z LITERALS FOR PADDING between end effector ###
 PADDING_X = 0.0
 PADDING_Y = 0.0
@@ -116,12 +119,12 @@ class Motion_planner:
         initial_pose = self.move_group.get_current_pose().pose
         prepick = Pose()
         prepick = start.pose
-        prepick.position.z += 0.1# move up 10 cm
+        prepick.position.z += 0.2# move up 20 cm
         waypoints.append(copy.deepcopy(initial_pose))
         waypoints.append(copy.deepcopy(prepick))
         
         pick = copy.deepcopy(prepick)
-        pick.position.z -= 0.1 # move down 10 cm
+        pick.position.z -= 0.2 # move down 20 cm
         waypoints.append(copy.deepcopy(pick))
 
         rospy.loginfo("#################################")
@@ -151,11 +154,13 @@ class Motion_planner:
             print(e)
             return False
 
+        rospy.sleep(1)
+
         # activate the gripper here
         rospy.loginfo("Activating gripper")
         self.set_io_client(1,12,1)
 
-        rospy.sleep(0.3)
+        rospy.sleep(1)
 
         # plan cartesian path to prepick -> place
         waypoints = []
@@ -164,9 +169,11 @@ class Motion_planner:
         waypoints.append(copy.deepcopy(prepick))
         preplace = Pose()
         preplace = end.pose
-        preplace.position.z += 0.15
+        # move up 20 cm
+        preplace.position.z += 0.20
         waypoints.append(copy.deepcopy(preplace))
         place = copy.deepcopy(preplace)
+        # move down 20 cm
         place.position.z -= 0.15
         waypoints.append(copy.deepcopy(place))
 
@@ -197,11 +204,15 @@ class Motion_planner:
         except Exception as e:
             print(e)
             return False
+        
+        rospy.sleep(1)
 
         # deactivate the gripper here
         waypoints = []
         rospy.loginfo("Deactivating gripper")
         self.set_io_client(1,12,0)
+
+        rospy.sleep(1)
 
         return True
         

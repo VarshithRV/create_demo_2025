@@ -3,14 +3,14 @@ import cv2
 import os
 
 model = load_model("groundingdino/config/GroundingDINO_SwinT_OGC.py", "weights/groundingdino_swint_ogc.pth")
-IMAGE_PATH = "assets/test_image_1.jpeg"
-TEXT_PROMPT = "shapes"
+IMAGE_PATH = "assets/generated_image.jpeg"
+TEXT_PROMPT = "detect .green_rectangle.red_triangle.blue_circle. in the white space, there are only 4 objects"
 BOX_TRESHOLD = 0.35
 TEXT_TRESHOLD = 0.25
 
-image = cv2.imread(IMAGE_PATH)
+# image = cv2.imread(IMAGE_PATH)
 
-image_source, image = load_image(image)
+image_source, image = load_image(IMAGE_PATH)
 
 boxes, logits, phrases = predict(
     model=model,

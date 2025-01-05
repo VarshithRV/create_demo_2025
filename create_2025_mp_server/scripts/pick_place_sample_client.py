@@ -19,52 +19,23 @@ if __name__ == "__main__":
     rospy.init_node("motion_planning_client")
     mp = MpClass()
     
-    source = PoseStamped()
-    source.pose.position.x= -0.3191730858291529
-    source.pose.position.y= 0.06125265641872258
-    source.pose.position.z= 0.14179217356509238
-    source.pose.orientation.x = 0.9653943031274262
-    source.pose.orientation.y = -0.2607581565937913
-    source.pose.orientation.z = -0.004191010953791741
-    source.pose.orientation.w = 0.0012077607809772351
-
-    
-    
-    
-
-    destination = PoseStamped()
-    destination.pose.position.x= -0.07567923083818827
-    destination.pose.position.y= 0.17103289933078292
-    destination.pose.position.z= 0.2777044193586933
-    destination.pose.orientation.x = 0.9655861251973878
-    destination.pose.orientation.y = -0.26005584641028756
-    destination.pose.orientation.z = -0.0037183083958979746
-    destination.pose.orientation.w = 0.0007521680640413613
-
-    rospy.loginfo("Sending pick and place goal")
-    pick_place_goal = PickPlaceGoal()
-    pick_place_goal.source = source
-    pick_place_goal.destination = destination
-
-    mp.left_pick_place_client.send_goal(pick_place_goal)
-    mp.left_pick_place_client.wait_for_result()
-    pick_place_result = mp.left_pick_place_client.get_result()
-    print("Pick and place result : ", pick_place_result.result)
-
-
     # source = PoseStamped()
-    # source.pose.position.x = 0.38169969662069597
-    # source.pose.position.y = 0.10677438559918866
-    # source.pose.position.z = 0.1828057741661568
+    # source.pose.position.x= -0.3191730858291529
+    # source.pose.position.y= 0.06125265641872258
+    # source.pose.position.z= 0.14179217356509238
     # source.pose.orientation.x = 0.9653943031274262
     # source.pose.orientation.y = -0.2607581565937913
     # source.pose.orientation.z = -0.004191010953791741
     # source.pose.orientation.w = 0.0012077607809772351
 
+    
+    
+    
+
     # destination = PoseStamped()
-    # destination.pose.position.x = 0.48169969662069597
-    # destination.pose.position.y = 0.10677438559918866
-    # destination.pose.position.z = 0.1828057741661568
+    # destination.pose.position.x= -0.07567923083818827
+    # destination.pose.position.y= 0.17103289933078292
+    # destination.pose.position.z= 0.2777044193586933
     # destination.pose.orientation.x = 0.9655861251973878
     # destination.pose.orientation.y = -0.26005584641028756
     # destination.pose.orientation.z = -0.0037183083958979746
@@ -75,7 +46,36 @@ if __name__ == "__main__":
     # pick_place_goal.source = source
     # pick_place_goal.destination = destination
 
-    # mp.right_pick_place_client.send_goal(pick_place_goal)
-    # mp.right_pick_place_client.wait_for_result()
-    # pick_place_result = mp.right_pick_place_client.get_result()
+    # mp.left_pick_place_client.send_goal(pick_place_goal)
+    # mp.left_pick_place_client.wait_for_result()
+    # pick_place_result = mp.left_pick_place_client.get_result()
     # print("Pick and place result : ", pick_place_result.result)
+
+
+    source = PoseStamped()
+    source.pose.position.x = 0.38169969662069597
+    source.pose.position.y = 0.10677438559918866
+    source.pose.position.z = 0.1828057741661568
+    source.pose.orientation.x = 0.9653943031274262
+    source.pose.orientation.y = -0.2607581565937913
+    source.pose.orientation.z = -0.004191010953791741
+    source.pose.orientation.w = 0.0012077607809772351
+
+    destination = PoseStamped()
+    destination.pose.position.x = 0.48169969662069597
+    destination.pose.position.y = 0.10677438559918866
+    destination.pose.position.z = 0.1828057741661568
+    destination.pose.orientation.x = 0.9655861251973878
+    destination.pose.orientation.y = -0.26005584641028756
+    destination.pose.orientation.z = -0.0037183083958979746
+    destination.pose.orientation.w = 0.0007521680640413613
+
+    rospy.loginfo("Sending pick and place goal")
+    pick_place_goal = PickPlaceGoal()
+    pick_place_goal.source = source
+    pick_place_goal.destination = destination
+
+    mp.right_pick_place_client.send_goal(pick_place_goal)
+    mp.right_pick_place_client.wait_for_result()
+    pick_place_result = mp.right_pick_place_client.get_result()
+    print("Pick and place result : ", pick_place_result.result)

@@ -16,12 +16,12 @@ from PIL import Image as PILImage
 from torchvision.ops import box_convert
 import tf2_ros, tf2_geometry_msgs
 import bisect
-
+import os
 ####### model parameters threshold ########
 BOX_THRESHOLD = 0.35
 TEXT_THRESHOLD = 0.25
-TEXT_PROMPT = "green_shape, red_shape, blue_shape"
-######################################
+TEXT_PROMPT = "detect .green_rectangle.red_triangle.blue_circle. in the white space, there are only 4 objects"
+####################################### 
 
 
 class Deprojection:
@@ -58,11 +58,11 @@ class Deprojection:
         # Service
         server = rospy.Service("get_object_locations", GetObjectLocations, self.get_object_locations)
         
-        # # create a publisher to publish the stream
-        # self.stream_pub = rospy.Publisher("/orange_position", PointStamped, queue_size=10)
+        # create a publisher to publish the stream
+        self.stream_pub = rospy.Publisher("/orange_position", PoseStamped, queue_size=10)
 
-        # # create a timer to publish stream
-        # self.timer = rospy.Timer(rospy.Duration(0.5), self.publish_stream)
+        # create a timer to publish stream
+        self.timer = rospy.Timer(rospy.Duration(0.5), self.publish_stream)
         pass
 
     # create a desctructor
@@ -120,26 +120,21 @@ class Deprojection:
             rospy.logerr(f"Transform extrapolation error: {e}")
         return None
 
-    # def publish_stream(self, event):
-    #     if self.bounding_boxes is None:
-    #         return
-    #     position = PointStamped()
-    #     for box in self.bounding_boxes:
-    #         id_ = box.id
-    #         class_ = box.Class
-    #         x = int((box.xmin + box.xmax) /2)
-    #         y = int((box.ymin + box.ymax) /2)
-    #         position = self.get_3d_position(x, y)
-    #         if position is None:
-    #             return
-    #     self.stream_pub.publish(position)
-    #     print("Published")
+    def publish_stream(self, event):
+        if self.latest_result is None:
+            return
+        position = PoseStamped()
+        position.header.frame_id = "world"
+        position.header.stamp = rospy.Time.now()
+        position.pose = self.latest_result.object_position[0].pose.pose
+        self.stream_pub.publish(position)
+        pass
 
 
     def get_3d_position(self, x, y):
         if self.depth_image is None and self.camera_info is None:
             return  # Wait until depth image is received
-        depth = (self.depth_image[y, x])  # Convert to meters
+        depth = (self.depth_image[y, x]/1000)  # Convert to meters
         if np.isnan(depth) or depth == 0:
             rospy.logwarn("Invalid depth at pixel ({}, {})".format(x, y))
             return
@@ -165,11 +160,14 @@ class Deprojection:
             rospy.logerr(f"Error transforming pose: {e}")
             return None
         
+        # return pose
 
     # this is the server function
     def get_object_locations(self,request):
         
         # save the current image as a source image
+        # change the image from bgr to rgb
+        self.color_image = cv2.cvtColor(self.color_image, cv2.COLOR_BGR2RGB)
         cv2.imwrite(self.source_image_path, self.color_image)
 
         # execute Grounding Dino here to get the bounding boxes based on the prompt
@@ -254,6 +252,7 @@ class Deprojection:
 
 if __name__ == "__main__":
     rospy.init_node("deprojection_node")
+    rospy.sleep(0.5)
     deproject = Deprojection()
     rospy.sleep(0.5)
     rospy.loginfo("Deproject server ready...")

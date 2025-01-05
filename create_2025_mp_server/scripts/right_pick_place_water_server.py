@@ -32,7 +32,7 @@ class Motion_planner:
         self.robot = moveit_commander.RobotCommander()
         self.scene = moveit_commander.PlanningSceneInterface()
 
-        self.group_name = "left_arm"
+        self.group_name = "right_arm"
         self.move_group = moveit_commander.MoveGroupCommander(self.group_name)
 
         # get the planning frame
@@ -59,15 +59,17 @@ class Motion_planner:
             queue_size=20,
         )
 
+
         self.waypoints = []
 
         # create action server for pick and place
         self.pick_place_server = actionlib.SimpleActionServer(
-            "left_pick_place", PickPlaceAction, self.pick_place_callback, auto_start=False
+            "right_pick_place", PickPlaceAction, self.pick_place_callback, auto_start=False
         )
 
+        
         # create a service client for /left/ur_hardware_interface/set_io
-        self.set_io_client = rospy.ServiceProxy("/left/ur_hardware_interface/set_io", SetIO)
+        self.set_io_client = rospy.ServiceProxy("/right/ur_hardware_interface/set_io", SetIO)
         self.set_io_client.wait_for_service()
         self.pick_place_server.start()
 
@@ -122,7 +124,7 @@ class Motion_planner:
         waypoints.append(copy.deepcopy(prepick))
         
         pick = copy.deepcopy(prepick)
-        pick.position.z -= 0.2 # move down 10 cm
+        pick.position.z -= 0.2 # move down 20 cm
         waypoints.append(copy.deepcopy(pick))
 
         rospy.loginfo("#################################")
@@ -156,12 +158,8 @@ class Motion_planner:
 
         # activate the gripper here
         rospy.loginfo("Activating gripper")
-        try : 
-            self.set_io_client(1, 12, 1)
-            self.set_io_client(1, 13, 1)
-        except Exception as e:
-            print(e)
-            return
+        self.set_io_client(1,12,1)
+
         rospy.sleep(1)
 
         # plan cartesian path to prepick -> place
@@ -169,13 +167,30 @@ class Motion_planner:
         current_pose = self.move_group.get_current_pose().pose
         waypoints.append(copy.deepcopy(current_pose))
         waypoints.append(copy.deepcopy(prepick))
+
+        up_jerk = copy.deepcopy(prepick)
+        up_jerk.position.z += 0.015
+        low_jerk = copy.deepcopy(up_jerk)
+        low_jerk.position.z -= 0.015
+        waypoints.append(copy.deepcopy(up_jerk))
+        waypoints.append(copy.deepcopy(low_jerk))
+        waypoints.append(copy.deepcopy(up_jerk))
+        waypoints.append(copy.deepcopy(low_jerk))
+        waypoints.append(copy.deepcopy(up_jerk))
+        waypoints.append(copy.deepcopy(low_jerk))
+        waypoints.append(copy.deepcopy(up_jerk))
+        waypoints.append(copy.deepcopy(low_jerk))
+        waypoints.append(copy.deepcopy(up_jerk))
+        waypoints.append(copy.deepcopy(low_jerk))
+        
         preplace = Pose()
         preplace = end.pose
         # move up 20 cm
         preplace.position.z += 0.20
         waypoints.append(copy.deepcopy(preplace))
         place = copy.deepcopy(preplace)
-        place.position.z -= 0.25
+        # move down 20 cm
+        place.position.z -= 0.15
         waypoints.append(copy.deepcopy(place))
 
         rospy.loginfo("#################################")
@@ -197,7 +212,6 @@ class Motion_planner:
         display_trajectory.trajectory.append(plan)
         self.display_trajectory_publisher.publish(display_trajectory)
 
-
         # execute the plan
         rospy.loginfo("Executing prepick -> place plan")
         try : 
@@ -206,23 +220,20 @@ class Motion_planner:
         except Exception as e:
             print(e)
             return False
-
-        rospy.sleep(1)
         
+        rospy.sleep(1)
+
         # deactivate the gripper here
         waypoints = []
         rospy.loginfo("Deactivating gripper")
-        try : 
-            self.set_io_client(1, 12, 0)
-            self.set_io_client(1, 13, 0)
-        except Exception as e:
-            print(e)
-            return
+        self.set_io_client(1,12,0)
+
+        rospy.sleep(1)
 
         return True
         
 if __name__  == "__main__":
-    rospy.init_node("left_pick_place_server", anonymous=True)
+    rospy.init_node("right_pick_place_server", anonymous=True)
     mp = Motion_planner()
     rospy.spin()
     moveit_commander.roscpp_shutdown()

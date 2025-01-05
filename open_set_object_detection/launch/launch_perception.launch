@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+
+    <include file="$(find realsense2_camera)/launch/rs_aligned_depth.launch"/>
+    <node pkg="open_set_object_detection" type="get_object_location_server.py" name="get_object_location_server" />
+</launch>
