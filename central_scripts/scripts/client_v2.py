@@ -12,6 +12,7 @@ from create_2025_mp_server_msgs.msg import PickPlaceAction, PickPlaceGoal, PickP
 from create_2025_mp_server_msgs.msg import MovePreactionAction, MovePreactionActionGoal, MovePreactionActionResult
 import actionlib
 from openai import OpenAI
+import numpy as np
 
 #### Define drope pose #########
 DROP_POSE = PoseStamped()
@@ -40,10 +41,10 @@ class CentralClient:
         self.right_move_preaction_client = actionlib.SimpleActionClient("right_move_preaction", MovePreactionAction)
         self.left_pick_place_client = actionlib.SimpleActionClient("left_pick_place", PickPlaceAction)
         self.left_move_preaction_client = actionlib.SimpleActionClient("left_move_preaction", MovePreactionAction)
-        # self.right_pick_place_client.wait_for_server()
-        # self.right_move_preaction_client.wait_for_server()
-        # self.left_pick_place_client.wait_for_server()
-        # self.left_move_preaction_client.wait_for_server()
+        self.right_pick_place_client.wait_for_server()
+        self.right_move_preaction_client.wait_for_server()
+        self.left_pick_place_client.wait_for_server()
+        self.left_move_preaction_client.wait_for_server()
         rospy.loginfo("All servers are connected")
 
     def get_object_locations(self):
@@ -103,24 +104,46 @@ class CentralClient:
         response = requests.post(url, data=json.dumps(content), headers=headers)
         return response.json()
     
-    def llm(self, prompt, object_detections):
+    def llm(self, prompt, object_detections, annotated_image):
+
+        # process image into the prompt as well
+        def encode_image(image):
+            _, buffer = cv2.imencode('.jpg', image)
+            image_base64 = base64.b64encode(buffer).decode('utf-8')
+            return image_base64
+
         print("IN llm call")
         print("prompt : ",prompt)
         print("object detections : ",object_detections)
-        
+        base64_annotated_image = encode_image(annotated_image)
+
+
         dict_obj_list = []
         for object in object_detections:
             dict_obj = {"id" : object.id, "label": object.Class}
             dict_obj_list.append(dict_obj)
 
         json_detections = json.dumps(dict_obj_list, indent=2)
-        preamble = "You are a robot controller, you can choose the objects you can manipulate you can only do one action \"pick\", you need to output in the following way, \"[<object_id_1>,<object_id_2> ...]\", for picking up <object_id_1> and <object_id_2>. If the robot needs to take any action based on the prompt, use the pick action."
+        preamble = "You are a robot controller, you can choose the objects you can manipulate you can only do one action \"pick\", you need to output in the following way, \"[<object_id_1>,<object_id_2> ...]\", for picking up <object_id_1> and <object_id_2>. If the robot needs to take any action based on the prompt, use the pick action. Refer the image and use it for spatial reasoning if necessary"
         client = OpenAI()
         completion = client.chat.completions.create(
             model="gpt-4o-mini",  # Assuming GPT-4 with vision is available
             messages=[
-                {"role": "system", "content": preamble},
-                {"role": "user", "content": f"User Prompt: {prompt}\nImage Annotations: {object_detections}"}
+                {
+                    "type" : "text",
+                    "role": "system", 
+                    "content": preamble
+                },
+                {
+                    "type" : "text",
+                    "role": "user", 
+                    "content": f"User Prompt: {prompt}\nImage Annotations: {object_detections}"
+                },
+                {
+                    "type": "image_url",
+                    "image_url" : {"url": f"data:image/jpeg;base64,{base64_annotated_image}"}
+                }
+
             ],
             max_tokens=150,
             temperature=0
@@ -196,12 +219,13 @@ if __name__ == "__main__":
         print("Object_pose : ",object_thing.pose)
 
     # save response.result.object_position.image
-    cv2.imwrite("/home/barracuda/catkin_ws/src/create_2025_demo/central_scripts/scripts/object_image.png", cv_bridge.CvBridge().imgmsg_to_cv2(response.result.image, desired_encoding="bgr8"))
+    annotated_image = cv_bridge.CvBridge().imgmsg_to_cv2(response.result.image, desired_encoding="bgr8")
+    cv2.imwrite("/home/barracuda/catkin_ws/src/create_2025_demo/central_scripts/scripts/object_image.png", annotated_image)
     print("Objects detected in time : ", rospy.Time.to_sec(rospy.Time.now()-time))
 
 
     prompt = input("Enter the prompt : ")
-    object_list = central_client.llm(prompt,response.result.object_position)
+    object_list = central_client.llm(prompt,response.result.object_position,annotated_image)
 
     # create the action list
     action_list = []
