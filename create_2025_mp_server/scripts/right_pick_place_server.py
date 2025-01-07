@@ -154,7 +154,7 @@ class Motion_planner:
 
         waypoints = []
         pick = copy.deepcopy(prepick)
-        pick.position.z -= 0.2 + 0.05# move down 20 cm
+        pick.position.z -= 0.2# move down 20 cm
         waypoints.append(copy.deepcopy(pick))
 
         self.execute_waypoints(waypoints)

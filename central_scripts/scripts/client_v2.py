@@ -195,13 +195,13 @@ if __name__ == "__main__":
         source_object_id = object_id
         source_object_position = response.result.object_position[object_id].pose
         if response.result.object_position[object_id].Class == "green _ rectangle":
-            source_object_position.pose.position.z = green_rectangle_z - 0.010
+            source_object_position.pose.position.z = green_rectangle_z - 0.010 + 0.05
         if response.result.object_position[object_id].Class == "red _ triangle":
-            source_object_position.pose.position.z = red_triangle_z - 0.009
+            source_object_position.pose.position.z = red_triangle_z - 0.009 + 0.05
             source_object_position.pose.position.x += 0.015
             source_object_position.pose.position.y += 0.005
         if response.result.object_position[object_id].Class == "blue _ circle":
-            source_object_position.pose.position.z = blue_circle_z
+            source_object_position.pose.position.z = blue_circle_z + 0.05
         source_object_position.pose.position.y -= 0.0275
         destination_object_position = DROP_POSE
         action_parsed = {
