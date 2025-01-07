@@ -33,14 +33,10 @@ class Motion_planner:
         )
 
         self.gripper_client = rospy.ServiceProxy("gripper", SetBool)
+        
 
         self.pre_action_joint_state = self.move_group.get_current_joint_values()
-        self.pre_action_joint_state[0] = -2.815
-        self.pre_action_joint_state[1] = -2.240
-        self.pre_action_joint_state[2] = 2.320
-        self.pre_action_joint_state[3] = -1.657
-        self.pre_action_joint_state[4] = -1.566
-        self.pre_action_joint_state[5] = 0
+        self.pre_action_joint_state = [-0.39823943773378545, -1.611523767510885, -0.8671970367431641, -2.0655557117857875, 1.6710524559020996, -2.7231467405902308]
         self.waypoints = []
 
         # create an action server for move preaction

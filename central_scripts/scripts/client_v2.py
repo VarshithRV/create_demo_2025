@@ -53,70 +53,19 @@ class CentralClient:
             return response
         except rospy.ServiceException as e:
             print(f"Service call failed: {e}")
-
-    def convert_image_to_text(self,image: Image) -> str:
-    # This is also how OpenAI encodes images: https://platform.openai.com/docs/guides/vision
-        with io.BytesIO() as output:
-            image.save(output, format="PNG")
-            data = output.getvalue()
-        return base64.b64encode(data).decode("utf-8")
-    
-    def test_demo_api(
-        self,
-        instruction: str,
-        response: GetObjectLocationsResponse,
-        url: str = "https://robot-api-2.glitch.me/handle_request",
-        ):
-        
-
-        image_ = cv_bridge.CvBridge().imgmsg_to_cv2(response.result.image, desired_encoding="bgr8")
-        image_ = Image.fromarray(cv2.cvtColor(image_, cv2.COLOR_BGR2RGB))
-
-        # create a timestamp using ros
-        timestamp = rospy.Time.now()
-        image_.save(str(timestamp)+".png")
-
-        objects = []
-        for object_position in response.result.object_position:
-            objects.append(
-                {
-                    "object_id": object_position.id,
-                    "x_min": object_position.x_min,
-                    "y_min": object_position.y_min,
-                    "x_max": object_position.x_max,
-                    "y_max": object_position.y_max,
-                }
-            ) 
-
-        image = {
-            "base64_string": self.convert_image_to_text(image_),
-            "objects": objects
-        }
-
-        data = {
-            "instruction": instruction,
-            "images": [image],
-        }
-        
-        print(data["instruction"], image["objects"])
-        headers = {"Content-Type": "application/json"}
-        content = dict(data=data, job_type="planning")
-        response = requests.post(url, data=json.dumps(content), headers=headers)
-        return response.json()
-    
+  
     def llm(self, prompt, object_detections, annotated_image):
 
         # process image into the prompt as well
         def encode_image(image):
-            _, buffer = cv2.imencode('.jpg', image)
+            buffer = cv2.imencode('.jpg', image)[1]
             image_base64 = base64.b64encode(buffer).decode('utf-8')
             return image_base64
 
         print("In llm call")
         print("prompt : ",prompt)
-        print("object detections : ",object_detections)
+        # print("object detections : ",object_detections)
         base64_annotated_image = encode_image(annotated_image)
-
 
         dict_obj_list = []
         for object in object_detections:
@@ -124,10 +73,11 @@ class CentralClient:
             dict_obj_list.append(dict_obj)
 
         json_detections = json.dumps(dict_obj_list, indent=2)
-        preamble = "You are a robot controller, you can choose the objects you can manipulate you can only do one action \"pick\", you need to output in the following way, \"[<object_id_1>,<object_id_2> ...]\", for picking up <object_id_1> and <object_id_2>. If the robot needs to take any action based on the prompt, use the pick action. Refer the image and use it for spatial reasoning if necessary"
+        preamble = "You are a robot controller, you can choose the objects you can manipulate you can only do one action \"pick\", you need to output in the following way, \"[<object_id_1>,<object_id_2> ...]\", for picking up <object_id_1> and <object_id_2>. Make sure the output format is adhered, do not include any more description of the reasoning. If the robot needs to take any action based on the prompt, use the pick action. Refer the image and use it for spatial reasoning if necessary"
         client = OpenAI()
+
         completion = client.chat.completions.create(
-            model="gpt-4o-mini",  # Assuming GPT-4 with vision is available
+            model="gpt-4o-mini", 
             messages=[
                 {
                     "type" : "text",
@@ -137,10 +87,12 @@ class CentralClient:
                 {
                     "type" : "text",
                     "role": "user", 
-                    "content": f"User Prompt: {prompt}\nImage Annotations: {object_detections}"
+                    "content": f"User Prompt: {prompt}\nImage Annotations: {json_detections}"
                 },
                 {
                     "type": "image_url",
+                    "role":"user",
+                    "content" : "This is the image",
                     "image_url" : {"url": f"data:image/jpg;base64,{base64_annotated_image}"}
                 }
 
@@ -148,9 +100,16 @@ class CentralClient:
             max_tokens=150,
             temperature=0
         )
+        rospy.loginfo(f"The output of llm : {completion.choices[0].message.content}")
 
         # Return the generated response
         pick_list = json.loads(completion.choices[0].message.content)
+        for object in pick_list:
+            object = int(object)
+
+
+        rospy.loginfo(f"The llm returned with object list : {pick_list}, {type(pick_list[0])}")
+
         return pick_list
         
 
@@ -198,8 +157,9 @@ if __name__ == "__main__":
     central_client = CentralClient()
     rospy.sleep(0.1)
     
-    time = rospy.Time.now()
+    prompt = input("Enter the prompt : ")
     
+    time = rospy.Time.now()
     # move to the preaction position
     move_preaction_goal = MovePreactionActionGoal()
     central_client.right_move_preaction_client.send_goal(move_preaction_goal)
@@ -211,7 +171,9 @@ if __name__ == "__main__":
 
     rospy.loginfo("Calling the perception now")
     response = central_client.get_object_locations()
-       
+    rospy.loginfo(f"Perception finished in time : {rospy.Time.now() - time}")
+
+    time1 = rospy.Time.now()
     # printing the object id and corresponding classes
     for object_thing in response.result.object_position:
         print("Object ID : ", object_thing.id)
@@ -224,9 +186,8 @@ if __name__ == "__main__":
     print("Objects detected in time : ", rospy.Time.to_sec(rospy.Time.now()-time))
 
 
-    prompt = input("Enter the prompt : ")
+    time2 = rospy.Time.now()
     object_list = central_client.llm(prompt,response.result.object_position,annotated_image)
-
     # create the action list
     action_list = []
 
@@ -234,11 +195,14 @@ if __name__ == "__main__":
         source_object_id = object_id
         source_object_position = response.result.object_position[object_id].pose
         if response.result.object_position[object_id].Class == "green _ rectangle":
-            source_object_position.pose.position.z = green_rectangle_z
+            source_object_position.pose.position.z = green_rectangle_z - 0.010
         if response.result.object_position[object_id].Class == "red _ triangle":
-            source_object_position.pose.position.z = red_triangle_z
+            source_object_position.pose.position.z = red_triangle_z - 0.009
+            source_object_position.pose.position.x += 0.015
+            source_object_position.pose.position.y += 0.005
         if response.result.object_position[object_id].Class == "blue _ circle":
             source_object_position.pose.position.z = blue_circle_z
+        source_object_position.pose.position.y -= 0.0275
         destination_object_position = DROP_POSE
         action_parsed = {
             "source_object_position": source_object_position,
@@ -246,22 +210,6 @@ if __name__ == "__main__":
         }
         action_list.append(action_parsed)
 
-    # this is for red triangle
-    # source_object_position.pose.position.z = red_triangle_z + 0.007
-
-    # this is for blue circle not red triangle
-    # source_object_position.pose.position.z = red_triangle_z + 0.005
-
-    # this is for green rectangle
-    # source_object_position.pose.position.z = green_rectangle_z + 0.05
-    
-    # destination_object_position = DROP_POSE
-    # action_parsed = {
-    #     "source_object_position": source_object_position,
-    #     "target_object_position": destination_object_position
-    # }
-    # action_list.append(action_parsed)
-
-    print(action_list)
-    input("Press Enter to continue ...")
+    # input("Press Enter to continue ...")
     central_client.execute_actions(action_list)
+    rospy.loginfo(f"Total execution time is {rospy.Time.now()-time}")

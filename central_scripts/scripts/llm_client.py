@@ -22,6 +22,9 @@ def call_gpt4_with_annotations(user_prompt, object_detections):
 
     # Return the generated response
     pick_list = json.loads(completion.choices[0].message.content)
+    for object in pick_list :
+        object = int(object)
+        
     return pick_list
 
 

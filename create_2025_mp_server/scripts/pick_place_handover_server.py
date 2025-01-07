@@ -319,9 +319,17 @@ class Motion_planner:
         initial_pose = self.move_group_right.get_current_pose().pose
         prepick = Pose()
         prepick = start.pose
-        prepick.position.z += 0.2# move up 20 cm
+        prepick.position.z += 0.2 # move up 20 cm
         waypoints.append(copy.deepcopy(initial_pose))
         waypoints.append(copy.deepcopy(prepick))
+        self.execute_waypoint_right(waypoints)
+
+        waypoints = []
+        pick = copy.deepcopy(prepick)
+        pick.position.z += -0.2 # move down 20cm
+        current = self.move_group_right.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current))
+        waypoints.append(copy.deepcopy(pick))
         self.execute_waypoint_right(waypoints)
 
         rospy.sleep(1)
@@ -341,124 +349,18 @@ class Motion_planner:
 
 
 
-        # pre handover sequence for right
-        waypoints = []
-        current_pose = self.move_group_right.get_current_pose().pose
-        waypoints.append(copy.deepcopy(current_pose))
-        waypoints.append(copy.deepcopy(handover_pose_right.pose))
-
-        self.execute_waypoint_right(waypoints)
         
 
-
-
-
-
-        # plan a cartesian path for left from current to pre handover to handover to prehandover
-        waypoints = []
-        current_pose = self.move_group_left.get_current_pose().pose
-        waypoints.append(copy.deepcopy(current_pose))
-        pre_handover_left = Pose()
-        pre_handover_left = handover_pose_left.pose
+        # # activate  the left gripper here
+        # rospy.loginfo("Activating left gripper")
+        # self.left_set_io_client(1,12,1)
+        # rospy.sleep(1)
         
-        ###################### pre handover configuration ######################
-        pre_handover_left.position.x -= 0.3
-        pre_handover_left.position.y -= 0.3
+        # # deactivate the right gripper here
+        # rospy.loginfo("Deactivating right gripper")
+        # self.right_set_io_client(1,12,0)
+        # rospy.sleep(1)
 
-        waypoints.append(copy.deepcopy(pre_handover_left))
-        waypoints.append(copy.deepcopy(handover_pose_left.pose))
-
-        rospy.loginfo("#################################")
-        rospy.loginfo("Waypoints for left arm, current to handover: %s", waypoints)
-
-        # plan a cartesian path for left
-        try :
-            (plan, fraction) = self.move_group_left.compute_cartesian_path(
-                waypoints,  # waypoints to follow
-                0.005,  # eef_step
-            )
-        except Exception as e:
-            print(e)
-            return False
-        
-        # display the plan for left
-        display_trajectory = moveit_msgs.msg.DisplayTrajectory()
-        display_trajectory.trajectory_start = self.robot.get_current_state()
-        display_trajectory.trajectory.append(plan)
-        self.display_trajectory_publisher.publish(display_trajectory)
-
-        # execute the plan for left
-        rospy.loginfo("Executing current -> handover plan for left")
-        try :
-            self.move_group_left.execute(plan, wait=True)
-            self.move_group_left.stop()
-        except Exception as e:
-            print(e)
-            return False
-        
-
-        # activate  the left gripper here
-        rospy.loginfo("Activating left gripper")
-        self.left_set_io_client(1,12,1)
-        rospy.sleep(1)
-        
-        # deactivate the right gripper here
-        rospy.loginfo("Deactivating right gripper")
-        self.right_set_io_client(1,12,0)
-        rospy.sleep(1)
-
-        # now the handover is done
-        # plan a cartesian path for left from handover to preplace
-        waypoints = []
-        current_pose = self.move_group_left.get_current_pose().pose
-        waypoints.append(copy.deepcopy(current_pose))
-        waypoints.append(copy.deepcopy(handover_pose_left.pose))
-        preplace = Pose()
-        preplace = end.pose
-        # move up 20 cm
-        preplace.position.z += 0.20
-        waypoints.append(copy.deepcopy(preplace))
-        place = copy.deepcopy(preplace)
-        # move down 20 cm
-        place.position.z -= 0.20
-        waypoints.append(copy.deepcopy(place))
-
-        rospy.loginfo("#################################")
-        rospy.loginfo("Waypoints for left arm, handover to place: %s", waypoints)
-
-        # plan a cartesian path for left
-        try :
-            (plan, fraction) = self.move_group_left.compute_cartesian_path(
-                waypoints,  # waypoints to follow
-                0.005,  # eef_step
-            )
-        except Exception as e:
-            print(e)
-            return False
-
-        # display the plan for left
-        display_trajectory = moveit_msgs.msg.DisplayTrajectory()
-        display_trajectory.trajectory_start = self.robot.get_current_state()
-        display_trajectory.trajectory.append(plan)
-        self.display_trajectory_publisher.publish(display_trajectory)
-
-        # execute the plan for left
-        rospy.loginfo("Executing handover -> place plan for left")
-        try :
-            self.move_group_left.execute(plan, wait=True)
-            self.move_group_left.stop()
-        except Exception as e:
-            print(e)
-            return False
-
-        rospy.sleep(1)
-
-        # deactivate the left gripper here
-        rospy.loginfo("Deactivating left gripper")
-        self.left_set_io_client(1,12,0)
-        rospy.sleep(1)
-
-        return True
         
 if __name__  == "__main__":
     rospy.init_node("right_pick_place_server", anonymous=True)

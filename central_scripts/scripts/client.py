@@ -120,7 +120,7 @@ class CentralClient:
             model="gpt-4o-mini",  # Assuming GPT-4 with vision is available
             messages=[
                 {"role": "system", "content": preamble},
-                {"role": "user", "content": f"User Prompt: {prompt}\nImage Annotations: {object_detections}"}
+                {"role": "user", "content": f"User Prompt: {prompt}\nImage Annotations: {json_detections}"}
             ],
             max_tokens=150,
             temperature=0
@@ -128,6 +128,11 @@ class CentralClient:
 
         # Return the generated response
         pick_list = json.loads(completion.choices[0].message.content)
+        for object in pick_list:
+            object = int(object)
+        
+        rospy.loginfo(f"The llm returned with object list : {pick_list}, {type(pick_list[0])}")
+
         return pick_list
         
 
@@ -222,22 +227,6 @@ if __name__ == "__main__":
         }
         action_list.append(action_parsed)
 
-    # this is for red triangle
-    # source_object_position.pose.position.z = red_triangle_z + 0.007
-
-    # this is for blue circle not red triangle
-    # source_object_position.pose.position.z = red_triangle_z + 0.005
-
-    # this is for green rectangle
-    # source_object_position.pose.position.z = green_rectangle_z + 0.05
-    
-    # destination_object_position = DROP_POSE
-    # action_parsed = {
-    #     "source_object_position": source_object_position,
-    #     "target_object_position": destination_object_position
-    # }
-    # action_list.append(action_parsed)
-
     print(action_list)
     input("Press Enter to continue ...")
-    central_client.execute_actions(action_list)
+    # central_client.execute_actions(action_list)
