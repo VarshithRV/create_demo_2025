@@ -41,6 +41,7 @@ class CentralClient:
         self.right_move_preaction_client = actionlib.SimpleActionClient("right_move_preaction", MovePreactionAction)
         self.left_pick_place_client = actionlib.SimpleActionClient("left_pick_place", PickPlaceAction)
         self.left_move_preaction_client = actionlib.SimpleActionClient("left_move_preaction", MovePreactionAction)
+        self.handover_client = actionlib.SimpleActionClient("pick_place_handover", PickPlaceAction)
         self.right_pick_place_client.wait_for_server()
         self.right_move_preaction_client.wait_for_server()
         self.left_pick_place_client.wait_for_server()
@@ -134,9 +135,9 @@ class CentralClient:
             pick_place_goal = PickPlaceGoal()
             pick_place_goal.source = source
             pick_place_goal.destination = destination
-            self.right_pick_place_client.send_goal(pick_place_goal)
-            self.right_pick_place_client.wait_for_result()
-            pick_place_result = self.right_pick_place_client.get_result()
+            self.handover_client.send_goal(pick_place_goal)
+            self.handover_client.wait_for_result()
+            pick_place_result = self.handover_client.get_result()
             print("Pick and place result : ", pick_place_result.result)
             rospy.sleep(1)
 
@@ -157,7 +158,7 @@ if __name__ == "__main__":
     central_client = CentralClient()
     rospy.sleep(0.1)
     
-    prompt = input("Enter the prompt : ")
+    # prompt = input("Enter the prompt : ")
     
     time = rospy.Time.now()
     # move to the preaction position
@@ -187,7 +188,15 @@ if __name__ == "__main__":
 
 
     time2 = rospy.Time.now()
-    object_list = central_client.llm(prompt,response.result.object_position,annotated_image)
+    # object_list = central_client.llm(prompt,response.result.object_position,annotated_image)
+    
+    object_list = []
+    while True : 
+        id = int(input("enter the id, 5 to cancel : "))
+        if id == 5:
+            break
+        object_list.append(id)
+
     # create the action list
     action_list = []
 

@@ -37,7 +37,7 @@ prompt = input("Enter the prompt: ")
 
 print("requesting llm")
 completion = client.chat.completions.create(
-            model="gpt-4o-mini", 
+            model="gpt-4o", 
             messages=[
                 {
                     "type" : "text",

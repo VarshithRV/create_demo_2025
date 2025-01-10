@@ -314,22 +314,25 @@ class Motion_planner:
         end.pose.orientation.z= -0.0036593492588516663
         end.pose.orientation.w= 0.007850179249297016
 
+        pick_place_height = 0.4271641690575525
+
+
         # plan a cartesian path for right to pick, prepick -> pick
         waypoints = []
         initial_pose = self.move_group_right.get_current_pose().pose
         prepick = Pose()
         prepick = start.pose
-        prepick.position.z += 0.2 # move up 20 cm
+        prepick.position.z = pick_place_height
         waypoints.append(copy.deepcopy(initial_pose))
         waypoints.append(copy.deepcopy(prepick))
         self.execute_waypoint_right(waypoints)
 
         waypoints = []
-        pick = copy.deepcopy(prepick)
-        pick.position.z += -0.2 # move down 20cm
+        pick = copy.deepcopy(start.pose)
         current = self.move_group_right.get_current_pose().pose
         waypoints.append(copy.deepcopy(current))
         waypoints.append(copy.deepcopy(pick))
+        
         self.execute_waypoint_right(waypoints)
 
         rospy.sleep(1)
@@ -346,20 +349,121 @@ class Motion_planner:
         waypoints.append(copy.deepcopy(current_pose))
         waypoints.append(copy.deepcopy(prepick))
         self.execute_waypoint_right(waypoints)
+        rospy.sleep(0.2)
 
+        # starting the right pre transfer sequence
+        # right pre transfer 1
+        waypoints = [] 
+        current_pose = self.move_group_right.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
+        waypoints.append(copy.deepcopy(right_pre_transfer_pose_1))
+        self.execute_waypoint_right(waypoints)
+        rospy.sleep(0.2)
 
-
+        # right pre transfer 2
+        waypoints = [] 
+        current_pose = self.move_group_right.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
+        waypoints.append(copy.deepcopy(right_pre_transfer_pose_2))
+        self.execute_waypoint_right(waypoints)
+        rospy.sleep(0.2)
         
+        # right transfer
+        waypoints = [] 
+        current_pose = self.move_group_right.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
+        waypoints.append(copy.deepcopy(right_transfer_pose))
+        self.execute_waypoint_right(waypoints)
+        rospy.sleep(0.2)
 
-        # # activate  the left gripper here
-        # rospy.loginfo("Activating left gripper")
-        # self.left_set_io_client(1,12,1)
-        # rospy.sleep(1)
+
+        # start left pre transfer
+        # left pre transfer 1
+        waypoints = [] 
+        current_pose = self.move_group_left.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
+        waypoints.append(copy.deepcopy(left_pre_transfer_pose_1))
+        self.execute_waypoint_left(waypoints)
+        rospy.sleep(0.2)
+
+        # left pre transfer 2
+        waypoints = [] 
+        current_pose = self.move_group_left.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
+        waypoints.append(copy.deepcopy(left_pre_transfer_pose_2))
+        self.execute_waypoint_left(waypoints)
+        rospy.sleep(0.2)
+
+        # left transfer
+        waypoints = [] 
+        current_pose = self.move_group_left.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
+        waypoints.append(copy.deepcopy(left_transfer_pose))
+        self.execute_waypoint_left(waypoints)
+        rospy.sleep(1)
+
+        # activate  the left gripper here
+        rospy.loginfo("Activating left gripper")
+        self.left_set_io_client(1,12,1)
+        rospy.sleep(1)
         
-        # # deactivate the right gripper here
-        # rospy.loginfo("Deactivating right gripper")
-        # self.right_set_io_client(1,12,0)
-        # rospy.sleep(1)
+        # deactivate the right gripper here
+        rospy.loginfo("Deactivating right gripper")
+        self.right_set_io_client(1,12,0)
+        rospy.sleep(1)
+
+        # right post transfer
+        waypoints = [] 
+        current_pose = self.move_group_right.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
+        waypoints.append(copy.deepcopy(right_post_transfer_pose))
+        self.execute_waypoint_right(waypoints)
+        rospy.sleep(0.2)
+
+        # left post transfer and place
+        # left post transfer 1
+        waypoints = [] 
+        current_pose = self.move_group_left.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
+        waypoints.append(copy.deepcopy(left_post_transfer_pose_1))
+        self.execute_waypoint_left(waypoints)
+        rospy.sleep(0.2)
+
+        # left post transfer 2
+        waypoints = [] 
+        current_pose = self.move_group_left.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
+        waypoints.append(copy.deepcopy(left_post_transfer_pose_2))
+        self.execute_waypoint_left(waypoints)
+        rospy.sleep(0.2)
+
+        # left post transfer 3
+        waypoints = [] 
+        current_pose = self.move_group_left.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
+        waypoints.append(copy.deepcopy(left_post_transfer_pose_3))
+        self.execute_waypoint_left(waypoints)
+        rospy.sleep(0.2)
+
+        # left preplace
+        preplace = Pose()
+        preplace = copy.deepcopy(end.pose)
+        preplace.position.z = pick_place_height
+        waypoints = [] 
+        current_pose = self.move_group_left.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
+        waypoints.append(copy.deepcopy(preplace))
+        self.execute_waypoint_left(waypoints)
+        rospy.sleep(0.2)
+
+        # left place
+        waypoints = [] 
+        current_pose = self.move_group_left.get_current_pose().pose
+        waypoints.append(copy.deepcopy(current_pose))
+        waypoints.append(copy.deepcopy(end.pose))
+        self.execute_waypoint_left(waypoints)
+        rospy.sleep(0.2)
+
 
         
 if __name__  == "__main__":

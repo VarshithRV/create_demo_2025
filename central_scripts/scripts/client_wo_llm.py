@@ -16,9 +16,9 @@ import numpy as np
 
 #### Define drope pose #########
 DROP_POSE = PoseStamped()
-DROP_POSE.pose.position.x= 0.2886250627392312
-DROP_POSE.pose.position.y= 0.15318942809629893
-DROP_POSE.pose.position.z= 0.30891036081855166
+DROP_POSE.pose.position.x= 0.30534226252226065
+DROP_POSE.pose.position.y= 0.13614659878257113
+DROP_POSE.pose.position.z= 0.30235998176214685
 DROP_POSE.pose.orientation.x = -0.9625925612708138
 DROP_POSE.pose.orientation.y = -0.26923720474112145
 DROP_POSE.pose.orientation.z = -0.005001943816401621
@@ -100,7 +100,6 @@ class CentralClient:
             max_tokens=150,
             temperature=0
         )
-        rospy.loginfo(f"The output of llm : {completion.choices[0].message.content}")
 
         # Return the generated response
         pick_list = json.loads(completion.choices[0].message.content)
@@ -157,7 +156,7 @@ if __name__ == "__main__":
     central_client = CentralClient()
     rospy.sleep(0.1)
     
-    prompt = input("Enter the prompt : ")
+    # prompt = input("Enter the prompt : ")
     
     time = rospy.Time.now()
     # move to the preaction position
@@ -178,7 +177,7 @@ if __name__ == "__main__":
     for object_thing in response.result.object_position:
         print("Object ID : ", object_thing.id)
         print("Object Class : ", object_thing.Class)
-        print("Object_pose : ",object_thing.pose)
+        # print("Object_pose : ",object_thing.pose)
 
     # save response.result.object_position.image
     annotated_image = cv_bridge.CvBridge().imgmsg_to_cv2(response.result.image, desired_encoding="bgr8")
@@ -187,7 +186,15 @@ if __name__ == "__main__":
 
 
     time2 = rospy.Time.now()
-    object_list = central_client.llm(prompt,response.result.object_position,annotated_image)
+    # object_list = central_client.llm(prompt,response.result.object_position,annotated_image)
+    
+    object_list = []
+    while True : 
+        id = int(input("enter the id, 5 to cancel : "))
+        if id == 5:
+            break
+        object_list.append(id)
+
     # create the action list
     action_list = []
 
@@ -195,16 +202,16 @@ if __name__ == "__main__":
         source_object_id = object_id
         source_object_position = response.result.object_position[object_id].pose
         if response.result.object_position[object_id].Class == "green _ rectangle":
-            source_object_position.pose.position.z = green_rectangle_z - 0.004
-            source_object_position.pose.position.x += 0.03
+            source_object_position.pose.position.z = green_rectangle_z - 0.004 + 0.001
+            source_object_position.pose.position.x += 0.025
             source_object_position.pose.position.y -= 0.04
         if response.result.object_position[object_id].Class == "red _ triangle":
             source_object_position.pose.position.z = red_triangle_z - 0.007
-            source_object_position.pose.position.x += 0.03
+            source_object_position.pose.position.x += 0.025
             source_object_position.pose.position.y -= 0.04
         if response.result.object_position[object_id].Class == "blue _ circle":
-            source_object_position.pose.position.z = blue_circle_z - 0.0075
-            source_object_position.pose.position.x += 0.03
+            source_object_position.pose.position.z = blue_circle_z - 0.0075 + 0.001
+            source_object_position.pose.position.x += 0.025
             source_object_position.pose.position.y -= 0.04
         destination_object_position = DROP_POSE
         action_parsed = {

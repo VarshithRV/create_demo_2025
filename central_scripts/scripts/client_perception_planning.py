@@ -157,7 +157,7 @@ if __name__ == "__main__":
     central_client = CentralClient()
     rospy.sleep(0.1)
     
-    prompt = input("Enter the prompt : ")
+    # prompt = input("Enter the prompt : ")
     
     time = rospy.Time.now()
     # move to the preaction position
@@ -187,7 +187,15 @@ if __name__ == "__main__":
 
 
     time2 = rospy.Time.now()
-    object_list = central_client.llm(prompt,response.result.object_position,annotated_image)
+    # object_list = central_client.llm(prompt,response.result.object_position,annotated_image)
+    
+    object_list = []
+    while True : 
+        id = int(input("enter the id, 5 to cancel : "))
+        if id == 5:
+            break
+        object_list.append(id)
+
     # create the action list
     action_list = []
 

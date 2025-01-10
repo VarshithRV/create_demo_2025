@@ -34,6 +34,7 @@ class Deprojection:
         self.camera_model = image_geometry.PinholeCameraModel()
         self.cv_bridge = cv_bridge.CvBridge()
         self.latest_result = None
+        self.recursion = 0
         self.source_image_path = "assets/generated_image.jpeg"
         self.model = load_model("groundingdino/config/GroundingDINO_SwinT_OGC.py", "weights/groundingdino_swint_ogc.pth")
         rospy.loginfo("Loaded the Grounding Dino model")
@@ -137,7 +138,13 @@ class Deprojection:
         depth = (self.depth_image[y, x]/1000)  # Convert to meters
         if np.isnan(depth) or depth == 0:
             rospy.logwarn("Invalid depth at pixel ({}, {})".format(x, y))
-            return
+            self.recursion +=1
+            if self.recursion <= 10:
+                self.get_3d_position(x,y)
+            else: 
+                self.recursion = 0
+                return None
+            
         # Project the 2D pixel to 3D point in the camera frame
         point_3d = self.camera_model.projectPixelTo3dRay((x, y))
         point_3d = np.array(point_3d) * depth  # Scale the ray by the depth
