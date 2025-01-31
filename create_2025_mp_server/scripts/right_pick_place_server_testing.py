@@ -17,6 +17,7 @@ from ur_msgs.srv import SetIO
 ### variable bound for change
 # move up or down, set gripper value, time before activating gripper and moving
 
+
 class Motion_planner:
 
     def __init__(self) -> None:
@@ -26,7 +27,7 @@ class Motion_planner:
         self.robot = moveit_commander.RobotCommander()
         self.scene = moveit_commander.PlanningSceneInterface()
 
-        self.group_name = "left_arm"
+        self.group_name = "right_arm"
         self.move_group = moveit_commander.MoveGroupCommander(self.group_name)
 
         # get the planning frame
@@ -53,15 +54,17 @@ class Motion_planner:
             queue_size=20,
         )
 
+
         self.waypoints = []
 
         # create action server for pick and place
         self.pick_place_server = actionlib.SimpleActionServer(
-            "left_pick_place", PickPlaceAction, self.pick_place_callback, auto_start=False
+            "right_pick_place", PickPlaceAction, self.pick_place_callback, auto_start=False
         )
 
+        
         # create a service client for /left/ur_hardware_interface/set_io
-        self.set_io_client = rospy.ServiceProxy("/left/ur_hardware_interface/set_io", SetIO)
+        self.set_io_client = rospy.ServiceProxy("/right/ur_hardware_interface/set_io", SetIO)
         self.set_io_client.wait_for_service()
         self.pick_place_server.start()
 
@@ -94,8 +97,6 @@ class Motion_planner:
             print(e)
             return False
 
-
-
     def pick_place_callback(self, goal:PickPlaceActionGoal):
         rospy.loginfo("Received pick and place goal")
         start = goal.source
@@ -115,6 +116,7 @@ class Motion_planner:
 
     def pick_and_place(self,start:PoseStamped, end:PoseStamped):
         rospy.loginfo("Started pick and place with start : %s and end : %s", start, end)
+        # start and end pose are configured with 0 linear transformation and fixed orientation
 
         pick_place_height = 0.3
 
@@ -130,16 +132,16 @@ class Motion_planner:
         self.execute_waypoints(waypoints)
         rospy.sleep(0.2)
 
-        waypoints = []
-        initial_pose = self.move_group.get_current_pose().pose
-        prepick2 = Pose()
-        prepick2 = copy.deepcopy(start.pose)
-        prepick2.position.z = pick_place_height - 0.1
-        waypoints.append(copy.deepcopy(initial_pose))
-        waypoints.append(copy.deepcopy(prepick2))
+        # waypoints = []
+        # initial_pose = self.move_group.get_current_pose().pose
+        # prepick2 = Pose()
+        # prepick2 = copy.deepcopy(start.pose)
+        # prepick2.position.z = pick_place_height - 0.1
+        # waypoints.append(copy.deepcopy(initial_pose))
+        # waypoints.append(copy.deepcopy(prepick2))
         
-        self.execute_waypoints(waypoints)
-        rospy.sleep(0.2)
+        # self.execute_waypoints(waypoints)
+        # rospy.sleep(0.2)
 
         waypoints = []
         pick = copy.deepcopy(start.pose)
@@ -155,13 +157,13 @@ class Motion_planner:
 
         rospy.sleep(1)
 
-        # plan cartesian path to pick -> prepick -> preplace
-        waypoints = []
-        current_pose = self.move_group.get_current_pose().pose
-        waypoints.append(copy.deepcopy(current_pose))
-        waypoints.append(copy.deepcopy(prepick2))
-        self.execute_waypoints(waypoints)
-        rospy.sleep(0.2)
+        # # plan cartesian path to pick -> prepick -> preplace
+        # waypoints = []
+        # current_pose = self.move_group.get_current_pose().pose
+        # waypoints.append(copy.deepcopy(current_pose))
+        # waypoints.append(copy.deepcopy(prepick2))
+        # self.execute_waypoints(waypoints)
+        # rospy.sleep(0.2)
 
         waypoints = []
         current_pose = self.move_group.get_current_pose().pose
@@ -178,13 +180,13 @@ class Motion_planner:
         self.execute_waypoints(waypoints)
         rospy.sleep(0.2)
 
-        waypoints = []
-        preplace2 = Pose()
-        preplace2 = copy.deepcopy(preplace)
-        preplace2.position.z = pick_place_height - 0.1
-        waypoints.append(copy.deepcopy(preplace2))
-        self.execute_waypoints(waypoints)
-        rospy.sleep(0.2)
+        # waypoints = []
+        # preplace2 = Pose()
+        # preplace2 = copy.deepcopy(preplace)
+        # preplace2.position.z = pick_place_height - 0.1
+        # waypoints.append(copy.deepcopy(preplace2))
+        # self.execute_waypoints(waypoints)
+        # rospy.sleep(0.2)
 
         waypoints = []
         place = copy.deepcopy(end.pose)
@@ -201,11 +203,11 @@ class Motion_planner:
 
         rospy.sleep(1)
 
-        waypoints = []
-        current_pose = self.move_group.get_current_pose().pose
-        waypoints.append(copy.deepcopy(current_pose))
-        waypoints.append(copy.deepcopy(preplace2))
-        self.execute_waypoints(waypoints)
+        # waypoints = []
+        # current_pose = self.move_group.get_current_pose().pose
+        # waypoints.append(copy.deepcopy(current_pose))
+        # waypoints.append(copy.deepcopy(preplace2))
+        # self.execute_waypoints(waypoints)
 
         waypoints = []
         current_pose = self.move_group.get_current_pose().pose
@@ -214,10 +216,9 @@ class Motion_planner:
         self.execute_waypoints(waypoints)
 
         return True
-
         
 if __name__  == "__main__":
-    rospy.init_node("left_pick_place_server", anonymous=True)
+    rospy.init_node("right_pick_place_server", anonymous=True)
     mp = Motion_planner()
     rospy.spin()
     moveit_commander.roscpp_shutdown()

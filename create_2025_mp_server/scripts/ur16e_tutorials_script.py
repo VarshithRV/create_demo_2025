@@ -20,7 +20,7 @@ class Motion_planner:
         self.robot = moveit_commander.RobotCommander()
         self.scene = moveit_commander.PlanningSceneInterface()
 
-        self.group_name = "manipulator"
+        self.group_name = "right_arm"
         self.move_group = moveit_commander.MoveGroupCommander(self.group_name)
 
         self.display_trajectory_publisher = rospy.Publisher(
@@ -29,24 +29,29 @@ class Motion_planner:
             queue_size=20,
         )
 
-        # This can be changed to a service call to ur_hardware_interface/set_io
-        self.gripper_client = rospy.ServiceProxy("gripper", SetBool)
-
-        self.pre_action_joint_state = [0, -tau/8, 0, -tau/4, 0, tau/6, 0]
+        self.pre_action_joint_state = [-4.178582557134416, -1.8478957454169482, 1.059382675616604, -0.834271961652154, -1.7276234756002236, 3.888690451551573]
         self.waypoints = []
 
     def pick_and_place(self,start:PointStamped, end:PointStamped):
         rospy.loginfo("Started pick and place with start : %s and end : %s", start, end)
+
+        orientation = Pose()
+        orientation.orientation.x= 0.8587785792187225
+        orientation.orientation.y= -0.5041193671665843
+        orientation.orientation.z= -0.08494413854312796
+        orientation.orientation.w= 0.03387489999691186
+
         # plan a cartesian path to pick, prepick -> pick
         waypoints = []
         prepick = Pose()
         prepick.position = start.point
-        prepick.orientation.w = 1.0
+        prepick.orientation  = orientation.orientation
         prepick.position.z += 0.1 # move up 10 cm
         waypoints.append(copy.deepcopy(prepick))
         
         pick = prepick
         pick.position.z -= 0.1 # move down 10 cm
+        pick.orientation = orientation.orientation
         waypoints.append(copy.deepcopy(pick))
 
         # rospy.loginfo("Waypoints : %s", waypoints)
@@ -54,12 +59,13 @@ class Motion_planner:
         try : 
             (plan, fraction) = self.move_group.compute_cartesian_path(
                 waypoints,  # waypoints to follow
-                0.01,  # eef_step
-                0.0,  # jump_threshold
+                0.005  # eef_step
             )
         except Exception as e:
             print(e)
             return False
+
+        print(type(plan))
 
         # display the plan
         display_trajectory = moveit_msgs.msg.DisplayTrajectory()
@@ -75,11 +81,6 @@ class Motion_planner:
             print(e)
             return False
         waypoints = []
-
-        # activate the gripper here
-        gripper_state = SetBool()
-        gripper_state.data = True
-        self.gripper_client.call(gripper_state)
 
         rospy.sleep(0.3)
 
@@ -87,7 +88,7 @@ class Motion_planner:
         waypoints.append(prepick)
         preplace = Pose()
         preplace.position = end.point
-        preplace.orientation.w = 1.0
+        preplace.orientation  = orientation.orientation
         preplace.position.z += 0.2
         waypoints.append(preplace)
 
@@ -95,8 +96,7 @@ class Motion_planner:
         try : 
             (plan, fraction) = self.move_group.compute_cartesian_path(
                 waypoints,  # waypoints to follow
-                0.01,  # eef_step
-                0.0,  # jump_threshold
+                0.005,  # eef_step
             )
         except Exception as e:
             print(e)
@@ -116,10 +116,6 @@ class Motion_planner:
             print(e)
             return False
         waypoints = []
-
-        # deactivate the gripper here
-        gripper_state.data = False
-        self.gripper_client.call(gripper_state)
 
         return True
     
@@ -138,13 +134,13 @@ if __name__  == "__main__":
 
     # modify xyz values to suitable readings
     start = PointStamped()
-    start.point.x = 0.4
-    start.point.y = 0.1
-    start.point.z = 0.4
+    start.point.x= 0.6807268633972163
+    start.point.y= 0.31614691160409114
+    start.point.z= 0.0
     end = PointStamped()
-    end.point.x = 0.4
-    end.point.y = -0.1
-    end.point.z = 0.4
+    end.point.x= 0.6807268633972163
+    end.point.y= 0.11614691160409114
+    end.point.z= 0.
 
     rospy.sleep(0.1)
     mp.move_to_preaction()

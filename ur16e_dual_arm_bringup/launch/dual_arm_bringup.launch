@@ -4,21 +4,24 @@
         <arg name="enable_pointcloud" value="true"/>
     </include> -->
 
+
     <!-- dual_arm_control.launch -->
     <include file="$(find ur16e_dual_arm_control)/launch/dual_arm_control.launch"/>
 
     <!-- move_group.launch -->
-    <include file="$(find ur16e_dual_arm_moveit_configuration)/launch/move_group.launch"/>
-
+    <include file="$(find ur16e_dual_arm_moveit_config)/launch/move_group.launch">
+        <param name="" value=""/>
+    </include>
+    
     <!-- moveit_rviz -->
-    <include file="$(find ur16e_dual_arm_moveit_configuration)/launch/moveit_rviz.launch"/>
+    <include file="$(find ur16e_dual_arm_moveit_config)/launch/moveit_rviz.launch"/>
 
     <!-- topic tools node for /joint_states -->
     <node pkg="topic_tools" type="relay" name="relay_left_joint_states" args="/left/joint_states /joint_states"/>
     <node pkg="topic_tools" type="relay" name="relay_right_joint_states" args="/right/joint_states /joint_states"/>
 
     <!-- add cameras here -->
-    <include file="$(find ur16e_dual_arm_bringup)/launch/left_arm_camera_transformation.launch"/>
-    <!-- <include file="$(find ur16e_dual_arm_bringup)/launch/right_arm_camera_transformation.launch"/> -->
+    <!-- <include file="$(find ur16e_dual_arm_bringup)/launch/left_arm_camera_transformation.launch"/> -->
+    <include file="$(find ur16e_dual_arm_bringup)/launch/right_arm_camera_transformation.launch"/>
 
 </launch>

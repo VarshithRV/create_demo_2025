@@ -2,8 +2,5 @@
 <launch>
   <arg name="right_kinematics" default="$(find ur16e_dual_arm_control)/etc/right_ur16e_kinematics_configuration.yaml"/>
   <arg name="left_kinematics" default="$(find ur16e_dual_arm_control)/etc/left_ur16e_kinematics_configuration.yaml"/>
-  <param name="robot_description" command="$(find xacro)/xacro '$(find ur16e_dual_arm_description)/urdf/dual_arm.xacro'
-   left_kinematics:=$(arg left_kinematics)
-   right_kinematics:=$(arg right_kinematics)
-  "/>
+  <param name="robot_description" command="$(find xacro)/xacro '$(find ur16e_dual_arm_description)/urdf/dual_arm.urdf'"/>
 </launch>

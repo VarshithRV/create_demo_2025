@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: ur16e_dual_arm_description
+    relative_path: urdf/dual_arm.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/dual_arm_ur16e.srdf
+  CONFIG:
+    author_name: Varshith R V
+    author_email: vrv278@gmail.com
+    generated_timestamp: 1737558204

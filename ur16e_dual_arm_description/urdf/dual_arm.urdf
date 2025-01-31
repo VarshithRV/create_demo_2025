@@ -356,6 +356,44 @@
         <child link="left_flange" />
         <origin rpy="0 -1.5707963267948966 -1.5707963267948966" xyz="0 0 0" />
     </joint>
+    <!-- custom eef -->
+    <link name="left_suction_gripper">
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.05" length="0.22" />
+            </geometry>
+            <material name="Blue">
+                <color rgba="0 0 1 1" />
+            </material>
+        </collision>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.05" length="0.22" />
+            </geometry>
+            <material name="Blue">
+                <color rgba="0 0 1 1" />
+            </material>
+        </visual>
+        <inertial>
+            <mass value="0.1" />
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <inertia ixx="0.03" iyy="0.03" izz="0.03" ixy="0.0" ixz="0.0" iyz="0.0" />
+        </inertial>
+    </link>
+    <!-- joint between custom eef and wrist_3 -->
+    <joint name="left_wrist_3_link-suction_gripper" type="fixed">
+        <parent link="left_wrist_3_link" />
+        <child link="left_suction_gripper" />
+        <origin rpy="0 0 0" xyz="0 0 0.11" />
+    </joint>
+    <link name="left_suction_gripper_poi" />
+    <joint name="left_suction_gripper-poi" type="fixed">
+        <parent link="left_suction_gripper" />
+        <child link="left_suction_gripper_poi" />
+        <origin rpy="0 0 0" xyz="0 0 0.11" />
+    </joint>
     <!-- ROS-Industrial 'tool0' frame: all-zeros tool frame -->
     <link name="left_tool0" />
     <joint name="left_flange-tool0" type="fixed">
@@ -707,6 +745,44 @@
         <parent link="right_base_link" />
         <child link="right_base" />
     </joint>
+    <!-- custom eef -->
+    <link name="right_suction_gripper">
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.05" length="0.22" />
+            </geometry>
+            <material name="Red">
+                <color rgba="1 0 0 1" />
+            </material>
+        </collision>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.05" length="0.22" />
+            </geometry>
+            <material name="Red">
+                <color rgba="1 0 0 1" />
+            </material>
+        </visual>
+        <inertial>
+            <mass value="0.1" />
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <inertia ixx="0.03" iyy="0.03" izz="0.03" ixy="0.0" ixz="0.0" iyz="0.0" />
+        </inertial>
+    </link>
+    <!-- joint between custom eef and wrist_3 -->
+    <joint name="right_wrist_3_link-_suction_gripper" type="fixed">
+        <parent link="right_wrist_3_link" />
+        <child link="right_suction_gripper" />
+        <origin rpy="0 0 0" xyz="0 0 0.11" />
+    </joint>
+    <link name="right_suction_gripper_poi" />
+    <joint name="right_suction_gripper-poi" type="fixed">
+        <parent link="right_suction_gripper" />
+        <child link="right_suction_gripper_poi" />
+        <origin rpy="0 0 0" xyz="0 0 0.11" />
+    </joint>
     <!-- ROS-Industrial 'flange' frame: attachment point for EEF models -->
     <link name="right_flange" />
     <joint name="right_wrist_3-flange" type="fixed">
@@ -728,12 +804,12 @@
     <joint name="world_to_left" type="fixed">
         <parent link="world" />
         <child link="left_base_link" />
-        <origin rpy="0 0 0" xyz="-0.5 0 0" />
+        <origin rpy="-0.013 -0.015 2.259" xyz="-0.510 0.565 0.013" />
     </joint>
     <joint name="world_to_right" type="fixed">
         <parent link="world" />
         <child link="right_base_link" />
-        <origin rpy="0 0 0" xyz="0.5 0 0" />
+        <origin rpy="-0.007 -0.032 2.295" xyz="0.636 0.617 0.005" />
     </joint>
     <gazebo>
         <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
@@ -741,4 +817,3 @@
         </plugin>
     </gazebo>
 </robot>
-

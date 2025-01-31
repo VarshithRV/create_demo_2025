@@ -1,8 +1,14 @@
 <?xml version="1.0"?>
 <launch>
     <include file="$(find ur16e_dual_arm_bringup)/launch/dual_arm_bringup.launch"/>
+    <!-- config for move group node -->
+    <!-- <rosparam file="$(find ur16e_dual_arm_moveit_config)/config/move_group_config.yaml" command="load"/> -->
     <node pkg="create_2025_mp_server" type="left_move_preaction_server.py" name="left_preaction_server" />
     <node pkg="create_2025_mp_server" type="right_move_preaction_server.py" name="right_preaction_server" />
+    <node pkg="create_2025_mp_server" type="left_move_rest_server.py" name="left_rest_server" />
+    <node pkg="create_2025_mp_server" type="right_move_rest_server.py" name="right_rest_server" />
+    <node pkg="create_2025_mp_server" type="left_move_look_server.py" name="left_look_server" />
+    <node pkg="create_2025_mp_server" type="right_move_look_server.py" name="right_look_server" />
     <node pkg="create_2025_mp_server" type="left_pick_place_server.py" name="left_pick_place_server" />
     <node pkg="create_2025_mp_server" type="right_pick_place_server.py" name="right_pick_place_server" />
 </launch>

@@ -16,7 +16,7 @@ import actionlib
 
 
 ## create 6 literals for joint states ###
-JOINT_STATE = [1.0641250610351562, -1.1918592912009736, -1.9976710081100464, -1.523759165113308, 1.575423002243042, -0.02685100237001592]
+JOINT_STATE = [1.5142738819122314, -1.0813396734050293, -2.2571804523468018, -1.3121875089458008, 1.5946305990219116, 0.7605836391448975]
 
 class Motion_planner:
 
@@ -44,7 +44,7 @@ class Motion_planner:
 
         # create an action server for move preaction
         self.move_preaction_server = actionlib.SimpleActionServer(
-            "left_move_preaction", MovePreactionAction, self.move_preaction_callback, auto_start=False
+            "left_move_rest", MovePreactionAction, self.move_preaction_callback, auto_start=False
         )
 
         self.move_preaction_server.start()

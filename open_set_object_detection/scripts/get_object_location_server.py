@@ -20,7 +20,7 @@ import os
 ####### model parameters threshold ########
 BOX_THRESHOLD = 0.35
 TEXT_THRESHOLD = 0.25
-TEXT_PROMPT = "detect .green_rectangle.red_triangle.blue_circle. in the white space, there are only 4 objects"
+TEXT_PROMPT = "colored shapes"
 ####################################### 
 
 
@@ -147,6 +147,8 @@ class Deprojection:
             
         # Project the 2D pixel to 3D point in the camera frame
         point_3d = self.camera_model.projectPixelTo3dRay((x, y))
+        print("X multiplier : ",point_3d[0])
+        print("Y multiplier : ",point_3d[1])
         point_3d = np.array(point_3d) * depth  # Scale the ray by the depth
         pose = PoseStamped()
         pose.header.frame_id = self.camera_model.tf_frame

@@ -17,11 +17,6 @@ from ur_msgs.srv import SetIO
 ### variable bound for change
 # move up or down, set gripper value, time before activating gripper and moving
 
-### CREATE X Y Z LITERALS FOR PADDING between end effector ###
-PADDING_X = 0.0
-PADDING_Y = 0.0
-PADDING_Z = 0.0
-#########################################
 
 class Motion_planner:
 
@@ -121,29 +116,9 @@ class Motion_planner:
 
     def pick_and_place(self,start:PoseStamped, end:PoseStamped):
         rospy.loginfo("Started pick and place with start : %s and end : %s", start, end)
-
-        start.pose.position.x += PADDING_X
-        start.pose.position.y += PADDING_Y
-        start.pose.position.z += PADDING_Z
-
-        end.pose.position.x += PADDING_X
-        end.pose.position.y += PADDING_Y
-        end.pose.position.z += PADDING_Z
-
-        start.pose.orientation.x= -0.35862806853220586
-        start.pose.orientation.y= -0.9334403528397598
-        start.pose.orientation.z= -0.0036593492588516663
-        start.pose.orientation.w= 0.007850179249297016
-
-
-        end.pose.orientation.x= -0.35862806853220586
-        end.pose.orientation.y= -0.9334403528397598
-        end.pose.orientation.z= -0.0036593492588516663
-        end.pose.orientation.w= 0.007850179249297016
-
         # start and end pose are configured with 0 linear transformation and fixed orientation
 
-        pick_place_height = 0.4271641690575525
+        pick_place_height = 0.3
 
         # plan a cartesian path to pick, prepick -> pick
         waypoints = []

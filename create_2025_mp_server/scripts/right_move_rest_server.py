@@ -14,9 +14,9 @@ from create_2025_mp_server_msgs.msg import PickPlaceAction, PickPlaceActionGoal,
 from create_2025_mp_server_msgs.msg import MovePreactionAction, MovePreactionActionGoal, MovePreactionActionResult
 import actionlib
 
-
 ## create 6 literals for joint states ###
-JOINT_STATE = [1.0641250610351562, -1.1918592912009736, -1.9976710081100464, -1.523759165113308, 1.575423002243042, -0.02685100237001592]
+JOINT_STATE = [0.15452194213867188, -2.077412267724508, 2.4101362864123743, -1.9045077762999476, -1.5682700316058558, 1.6366455554962158]
+
 
 class Motion_planner:
 
@@ -27,7 +27,7 @@ class Motion_planner:
         self.robot = moveit_commander.RobotCommander()
         self.scene = moveit_commander.PlanningSceneInterface()
 
-        self.group_name = "left_arm"
+        self.group_name = "right_arm"
         self.move_group = moveit_commander.MoveGroupCommander(self.group_name)
 
         self.display_trajectory_publisher = rospy.Publisher(
@@ -44,7 +44,7 @@ class Motion_planner:
 
         # create an action server for move preaction
         self.move_preaction_server = actionlib.SimpleActionServer(
-            "left_move_preaction", MovePreactionAction, self.move_preaction_callback, auto_start=False
+            "right_move_rest", MovePreactionAction, self.move_preaction_callback, auto_start=False
         )
 
         self.move_preaction_server.start()
@@ -74,7 +74,7 @@ class Motion_planner:
         return True
         
 if __name__  == "__main__":
-    rospy.init_node("left_preaction_server", anonymous=True)
+    rospy.init_node("right_preaction_server", anonymous=True)
     mp = Motion_planner()
     rospy.spin()
     moveit_commander.roscpp_shutdown()
