@@ -81,6 +81,8 @@ class Motion_planner:
         except Exception as e:
             print(e)
             return False
+        
+        rospy.loginfo(f"Fraction : {fraction}")
 
         # display the plan
         display_trajectory = moveit_msgs.msg.DisplayTrajectory()

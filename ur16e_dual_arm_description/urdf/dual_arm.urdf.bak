@@ -368,11 +368,13 @@
             </material>
         </collision>
         <visual>
-            <origin xyz="0.05 -0.115 0.20" rpy="0 3.14 0" />
+            <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh scale="0.001 0.001 0.001" filename="package://ur16e_dual_arm_description/urdf/meshes/suction_gripper.STL" />
+                <cylinder radius="0.05" length="0.22" />
             </geometry>
-
+            <material name="Blue">
+                <color rgba="0 0 1 1" />
+            </material>
         </visual>
         <inertial>
             <mass value="0.1" />
@@ -384,13 +386,13 @@
     <joint name="left_wrist_3_link-suction_gripper" type="fixed">
         <parent link="left_wrist_3_link" />
         <child link="left_suction_gripper" />
-        <origin rpy="0 0 3.14" xyz="0 0 0.0" />
+        <origin rpy="0 0 0" xyz="0 0 0.11" />
     </joint>
     <link name="left_suction_gripper_poi" />
     <joint name="left_suction_gripper-poi" type="fixed">
         <parent link="left_suction_gripper" />
         <child link="left_suction_gripper_poi" />
-        <origin rpy="0 0 0" xyz="0 0 0.19" />
+        <origin rpy="0 0 0" xyz="0 0 0.11" />
     </joint>
     <!-- ROS-Industrial 'tool0' frame: all-zeros tool frame -->
     <link name="left_tool0" />
