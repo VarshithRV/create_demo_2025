@@ -130,16 +130,16 @@ class Motion_planner:
         self.execute_waypoints(waypoints)
         rospy.sleep(0.2)
 
-        waypoints = []
-        initial_pose = self.move_group.get_current_pose().pose
-        prepick2 = Pose()
-        prepick2 = copy.deepcopy(start.pose)
-        prepick2.position.z = pick_place_height - 0.1
-        waypoints.append(copy.deepcopy(initial_pose))
-        waypoints.append(copy.deepcopy(prepick2))
+        # waypoints = []
+        # initial_pose = self.move_group.get_current_pose().pose
+        # prepick2 = Pose()
+        # prepick2 = copy.deepcopy(start.pose)
+        # prepick2.position.z = pick_place_height - 0.1
+        # waypoints.append(copy.deepcopy(initial_pose))
+        # waypoints.append(copy.deepcopy(prepick2))
         
-        self.execute_waypoints(waypoints)
-        rospy.sleep(0.2)
+        # self.execute_waypoints(waypoints)
+        # rospy.sleep(0.2)
 
         waypoints = []
         pick = copy.deepcopy(start.pose)
@@ -156,12 +156,12 @@ class Motion_planner:
         rospy.sleep(1)
 
         # plan cartesian path to pick -> prepick -> preplace
-        waypoints = []
-        current_pose = self.move_group.get_current_pose().pose
-        waypoints.append(copy.deepcopy(current_pose))
-        waypoints.append(copy.deepcopy(prepick2))
-        self.execute_waypoints(waypoints)
-        rospy.sleep(0.2)
+        # waypoints = []
+        # current_pose = self.move_group.get_current_pose().pose
+        # waypoints.append(copy.deepcopy(current_pose))
+        # waypoints.append(copy.deepcopy(prepick2))
+        # self.execute_waypoints(waypoints)
+        # rospy.sleep(0.2)
 
         waypoints = []
         current_pose = self.move_group.get_current_pose().pose
@@ -178,13 +178,13 @@ class Motion_planner:
         self.execute_waypoints(waypoints)
         rospy.sleep(0.2)
 
-        waypoints = []
-        preplace2 = Pose()
-        preplace2 = copy.deepcopy(preplace)
-        preplace2.position.z = pick_place_height - 0.1
-        waypoints.append(copy.deepcopy(preplace2))
-        self.execute_waypoints(waypoints)
-        rospy.sleep(0.2)
+        # waypoints = []
+        # preplace2 = Pose()
+        # preplace2 = copy.deepcopy(preplace)
+        # preplace2.position.z = pick_place_height - 0.1
+        # waypoints.append(copy.deepcopy(preplace2))
+        # self.execute_waypoints(waypoints)
+        # rospy.sleep(0.2)
 
         waypoints = []
         place = copy.deepcopy(end.pose)
@@ -201,11 +201,11 @@ class Motion_planner:
 
         rospy.sleep(1)
 
-        waypoints = []
-        current_pose = self.move_group.get_current_pose().pose
-        waypoints.append(copy.deepcopy(current_pose))
-        waypoints.append(copy.deepcopy(preplace2))
-        self.execute_waypoints(waypoints)
+        # waypoints = []
+        # current_pose = self.move_group.get_current_pose().pose
+        # waypoints.append(copy.deepcopy(current_pose))
+        # waypoints.append(copy.deepcopy(preplace2))
+        # self.execute_waypoints(waypoints)
 
         waypoints = []
         current_pose = self.move_group.get_current_pose().pose

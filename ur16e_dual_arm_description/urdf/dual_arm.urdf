@@ -359,13 +359,13 @@
     <!-- custom eef -->
     <link name="left_suction_gripper">
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0" />
+            <origin xyz="0 0 0.09" rpy="0 3.14 0" />
             <geometry>
-                <cylinder radius="0.05" length="0.22" />
+                <cylinder radius="0.05" length="0.15" />
             </geometry>
-            <material name="Blue">
+            <!-- <material name="Blue">
                 <color rgba="0 0 1 1" />
-            </material>
+            </material> -->
         </collision>
         <visual>
             <origin xyz="0.05 -0.115 0.20" rpy="0 3.14 0" />
@@ -390,7 +390,7 @@
     <joint name="left_suction_gripper-poi" type="fixed">
         <parent link="left_suction_gripper" />
         <child link="left_suction_gripper_poi" />
-        <origin rpy="0 0 0" xyz="0 0 0.19" />
+        <origin rpy="0 0 0" xyz="-0.004 -0.002 0.173" /> <!-- actual depth is 0.198 -->
     </joint>
     <!-- ROS-Industrial 'tool0' frame: all-zeros tool frame -->
     <link name="left_tool0" />
@@ -802,12 +802,12 @@
     <joint name="world_to_left" type="fixed">
         <parent link="world" />
         <child link="left_base_link" />
-        <origin rpy="-0.013 -0.015 2.259" xyz="-0.510 0.565 0.013" />
+        <origin rpy="-0.008 0.002 2.237" xyz="-0.498 0.530 0.005" />
     </joint>
     <joint name="world_to_right" type="fixed">
         <parent link="world" />
         <child link="right_base_link" />
-        <origin rpy="-0.007 -0.032 2.295" xyz="0.636 0.617 0.005" />
+        <origin rpy="-0.002 -0.001 2.268" xyz="0.647 0.539 0.007" />
     </joint>
     <gazebo>
         <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
