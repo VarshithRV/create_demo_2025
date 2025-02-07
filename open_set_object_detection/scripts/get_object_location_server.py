@@ -5,7 +5,6 @@ from typing import List, Tuple
 import cv_bridge, cv2
 import image_geometry
 import numpy as np
-from darknet_ros_msgs.msg import BoundingBoxes
 from groundingdino.util.inference import load_model, load_image, predict
 from open_set_object_detection_msgs.msg import ObjectPosition, ObjectPositions
 from open_set_object_detection_msgs.srv import GetObjectLocations, GetObjectLocationsResponse
