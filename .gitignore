@@ -1,5 +1,10 @@
 GroundingDINO/
 open_set_object_detection/scripts/weights/
 open_set_object_detection/scripts/*.pt*
+open_set_object_detection/scripts/groundingdino
 build/*
 segment_anything/
+sampled_images/
+*.bag
+bag_files/
+sam2
