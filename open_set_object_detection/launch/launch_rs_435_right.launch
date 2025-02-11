@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+    <group ns="right">
+        <include file="$(find realsense2_camera)/launch/rs_aligned_depth.launch">
+            <arg name="camera" value="rs_435i" />
+            <arg name="serial_no" value="135122075246" />
+            <arg name="color_width" value="1280" />
+            <arg name="color_height" value="720" />
+        </include>
+    </group>
+        <!-- <node pkg="open_set_object_detection" type="get_object_location_server.py" name="get_object_location_server" /> -->
+</launch>

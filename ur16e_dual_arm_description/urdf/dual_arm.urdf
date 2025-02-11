@@ -368,9 +368,9 @@
             </material> -->
         </collision>
         <visual>
-            <origin xyz="0.05 -0.115 0.20" rpy="0 3.14 0" />
+            <origin xyz="-0.67 0.17 0.0" rpy="0 0 0" />
             <geometry>
-                <mesh scale="0.001 0.001 0.001" filename="package://ur16e_dual_arm_description/urdf/meshes/suction_gripper.STL" />
+                <mesh scale="0.001 0.001 0.001" filename="package://ur16e_dual_arm_description/urdf/meshes/calibrator.stl" />
             </geometry>
 
         </visual>
@@ -384,13 +384,14 @@
     <joint name="left_wrist_3_link-suction_gripper" type="fixed">
         <parent link="left_wrist_3_link" />
         <child link="left_suction_gripper" />
-        <origin rpy="0 0 3.14" xyz="0 0 0.0" />
+        <origin rpy="0 0 0" xyz="0 0 0.0" />
     </joint>
     <link name="left_suction_gripper_poi" />
     <joint name="left_suction_gripper-poi" type="fixed">
         <parent link="left_suction_gripper" />
         <child link="left_suction_gripper_poi" />
-        <origin rpy="0 0 0" xyz="-0.004 -0.002 0.173" /> <!-- actual depth is 0.198 -->
+        <!-- <origin rpy="0 0 0" xyz="-0.004 -0.002 0.173" />  actual depth is 0.198 -->
+        <origin rpy="0 0 0" xyz="-0.003 -0.001 0.093" /> <!-- actual depth is 0.083 -->
     </joint>
     <!-- ROS-Industrial 'tool0' frame: all-zeros tool frame -->
     <link name="left_tool0" />
