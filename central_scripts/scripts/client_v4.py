@@ -225,12 +225,12 @@ if __name__ == "__main__":
         
     # move to the preaction position
     move_preaction_goal = MovePreactionActionGoal()
-    central_client.left_move_rest_client.send_goal(move_preaction_goal)
-    central_client.left_move_rest_client.wait_for_result()
-    move_preaction_result = central_client.left_move_rest_client.get_result()
-    central_client.right_move_look_client.send_goal(move_preaction_goal)
-    central_client.right_move_look_client.wait_for_result()
-    move_preaction_result = central_client.right_move_look_client.get_result()
+    central_client.right_move_rest_client.send_goal(move_preaction_goal)
+    central_client.right_move_rest_client.wait_for_result()
+    move_preaction_result = central_client.right_move_rest_client.get_result()
+    central_client.left_move_look_client.send_goal(move_preaction_goal)
+    central_client.left_move_look_client.wait_for_result()
+    move_preaction_result = central_client.left_move_look_client.get_result()
     rospy.sleep(0.2)
     rospy.loginfo("Calling the perception now")
     response = central_client.get_object_locations()
