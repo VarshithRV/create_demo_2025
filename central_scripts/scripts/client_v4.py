@@ -28,10 +28,10 @@ DROP_POSE.pose.orientation.w= 0.008127542614487311
 
 #### Define pick place orientation #######
 ORIENTATION_POSE = PoseStamped()
-ORIENTATION_POSE.pose.orientation.x= -0.7084016817823435
-ORIENTATION_POSE.pose.orientation.y= 0.7057186070566935
-ORIENTATION_POSE.pose.orientation.z= 0.007889737191896513
-ORIENTATION_POSE.pose.orientation.w= 0.008127542614487311
+ORIENTATION_POSE.pose.orientation.x= -0.9213484323776968
+ORIENTATION_POSE.pose.orientation.y= 0.38857296439791666
+ORIENTATION_POSE.pose.orientation.z= 0.00429333977367731
+ORIENTATION_POSE.pose.orientation.w= 0.010473047682687926
 
 
 #### World Z for different objects 
@@ -226,12 +226,12 @@ if __name__ == "__main__":
         
     # move to the preaction position
     move_preaction_goal = MovePreactionActionGoal()
-    central_client.right_move_rest_client.send_goal(move_preaction_goal)
-    central_client.right_move_rest_client.wait_for_result()
-    move_preaction_result = central_client.right_move_rest_client.get_result()
-    central_client.left_move_look_client.send_goal(move_preaction_goal)
-    central_client.left_move_look_client.wait_for_result()
-    move_preaction_result = central_client.left_move_look_client.get_result()
+    central_client.left_move_rest_client.send_goal(move_preaction_goal)
+    central_client.left_move_rest_client.wait_for_result()
+    move_preaction_result = central_client.left_move_rest_client.get_result()
+    central_client.right_move_look_client.send_goal(move_preaction_goal)
+    central_client.right_move_look_client.wait_for_result()
+    move_preaction_result = central_client.right_move_look_client.get_result()
     rospy.sleep(0.2)
     rospy.loginfo("Calling the perception now")
     response = central_client.get_object_locations()

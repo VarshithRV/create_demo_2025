@@ -93,7 +93,7 @@ class Motion_planner:
         self.display_trajectory_publisher.publish(display_trajectory)
 
         # execute the plan
-        rospy.loginfo("Executing prepick")
+        rospy.loginfo("Executing")
         try : 
             self.move_group.execute(plan, wait=True)
             self.move_group.stop()
@@ -122,7 +122,7 @@ class Motion_planner:
         rospy.loginfo("Started pick and place with start : %s and end : %s", start, end)
 
         pick_place_height = 0.3
-        look_height = 0.15
+        look_height = 0.25
 
         # plan a cartesian path to pick, prepick -> pick
         waypoints = []
@@ -151,22 +151,34 @@ class Motion_planner:
         # call the perception here
         response = GetObjectLocationsResponse()
         response = self.left_get_object_locations_service()
-        if len(response.object_position) > 1:
-            rospy.logwarn("Multiple objects detected while taking a closer look, might lead to wrong object being picked")
-        object_pose = response.object_position[0].pose.pose
+        if response is not None :
+            pass
+        else :
+            rospy.logerr("Second Perception failed, motion plan failed")
+            return None
+        
+        if len(response.result.object_position) > 1 or len(response.result.object_position) ==0:
+            rospy.logwarn("Multiple or no objects detected while taking a closer look, might lead to wrong object being picked")
+        object_pose = response.result.object_position[0].pose.pose
+        rospy.loginfo("Detected object : %s" %response.result.object_position[0].pose.pose)
 
         # picking the object
+        rospy.loginfo("####### Executing pick after second perception ########")
         waypoints  = []
         initial_pose = self.move_group.get_current_pose().pose
-        pick = object_pose
-        correction = pick
+        pick = copy.deepcopy(object_pose)
+        pick.orientation = start.pose.orientation
+        correction = copy.deepcopy(pick)
         correction.position.z = initial_pose.position.z
         #### adding padding here ############################# remove it if when not testing #######
-        pick.position.z = 0.025
+        # pick.position.z = 0.04
         ############################################################################################
         waypoints.append(copy.deepcopy(initial_pose))
         waypoints.append(copy.deepcopy(correction))
         waypoints.append(copy.deepcopy(pick))
+
+        self.execute_waypoints(waypoints)
+        rospy.sleep(0.2)
 
         rospy.sleep(1)
 

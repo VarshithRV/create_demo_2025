@@ -172,7 +172,7 @@ class Deprojection:
             rospy.logwarn("Invalid depth at pixel ({}, {})".format(x, y))
             self.recursion +=1
             if self.recursion <= 10:
-                self.get_3d_position(x,y)
+                self.get_3d_position(x,y,depth_image=depth_image,camera_info=camera_info,camera_model=camera_model)
             else: 
                 self.recursion = 0
                 return None
