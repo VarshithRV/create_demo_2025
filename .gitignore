@@ -10,4 +10,5 @@ segment_anything/
 sampled_images/
 *.bag
 bag_files/
+__pycache__/
 sam2
