@@ -1,4 +1,4 @@
-GroundingDINO/
+*/weights/*
 open_set_object_detection/scripts/weights/
 open_set_object_detection/scripts/*.pt*
 open_set_object_detection/scripts/groundingdino
