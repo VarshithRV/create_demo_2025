@@ -52,9 +52,10 @@ red_triangle_right_z = 0.25
 class CentralClient:
     def __init__(self) -> None:
         self.get_object_locations_service = rospy.ServiceProxy(
-            "get_object_locations",
+            "right_get_object_locations",
             GetObjectLocations
         )
+
         rospy.loginfo("Waiting for servers")
         self.right_pick_place_client = actionlib.SimpleActionClient("right_pick_place", PickPlaceAction)
         self.right_move_preaction_client = actionlib.SimpleActionClient("right_move_preaction", MovePreactionAction)
@@ -317,8 +318,7 @@ if __name__ == "__main__":
             "target_object_position": destination_object_position
         }
         action_list_right.append(action_parsed)
-    # print(action_list_left)
-    # print(action_list_right)
+    
     input("Press Enter to continue ...")
     central_client.execute_actions_right(action_list_right)
     central_client.execute_actions_left(action_list_left)
