@@ -313,6 +313,7 @@ if __name__ == "__main__":
         #     source_object_position.pose.position.x += 0
         #     source_object_position.pose.position.y -= 0
         destination_object_position = DROP_POSE
+        source_object_position.pose.orientation = ORIENTATION_POSE.pose.orientation
         action_parsed = {
             "source_object_position": source_object_position,
             "target_object_position": destination_object_position
