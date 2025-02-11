@@ -22,6 +22,6 @@
 
     <!-- add cameras here -->
     <!-- <include file="$(find ur16e_dual_arm_bringup)/launch/left_arm_camera_transformation.launch"/> -->
-    <include file="$(find ur16e_dual_arm_bringup)/launch/right_arm_camera_transformation.launch"/>
+    <!-- <include file="$(find ur16e_dual_arm_bringup)/launch/right_arm_camera_transformation.launch"/> -->
 
 </launch>
