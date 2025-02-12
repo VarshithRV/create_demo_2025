@@ -82,6 +82,7 @@ class Motion_planner:
                 waypoints,  # waypoints to follow
                 0.005,  # eef_step
             )
+            plan=self.move_group.retime_trajectory(self.move_group.get_current_state(),plan,1.0)
         except Exception as e:
             print(e)
             return False
