@@ -6,6 +6,7 @@
             <arg name="serial_no" value="135122075246" />
             <arg name="color_width" value="1280" />
             <arg name="color_height" value="720" />
+            <arg name="enable_pointcloud" value="true" />
         </include>
     </group>
     <include file="$(find open_set_object_detection)/launch/right_arm_rs_435_extrinsic.launch"/>
