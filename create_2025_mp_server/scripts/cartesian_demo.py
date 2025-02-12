@@ -17,7 +17,9 @@ def cartesian_path_with_waypoints():
     start_pose = move_group.get_current_pose().pose
     waypoints = []
 
-    # Define 4 waypoints relative to the starting pose
+    waypoints.append(copy.deepcopy(start_pose))
+    # waypoints.append(copy.deepcopy(origin))
+
     wpose = copy.deepcopy(start_pose)
 
     # Waypoint 1: Move along the X-axis
@@ -42,13 +44,18 @@ def cartesian_path_with_waypoints():
     eef_step = 0.005  # Step size in meters
     jump_threshold = 0.0  # Disable jump threshold
     (plan, fraction) = move_group.compute_cartesian_path(waypoints, eef_step)
+    plan=move_group.retime_trajectory(move_group.get_current_state(),plan,velocity_scaling_factor = 1.0, algorithm="time_optimal_trajectory_generation")
 
     rospy.loginfo(f"Computed path fraction: {fraction}")
 
     # Check if the path was fully computed
     if fraction > 0.99:
         rospy.loginfo("Executing the Cartesian path...")
-        move_group.execute(plan, wait=True)
+        move_group.execute(plan, wait=False)
+        rospy.loginfo("Executing, waiting till 2 seconds and then preempting")
+        rospy.sleep(4)
+        move_group.stop()
+        
     else:
         rospy.logwarn("Cartesian path planning failed to compute a valid trajectory.")
 
