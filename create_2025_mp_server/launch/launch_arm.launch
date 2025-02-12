@@ -9,6 +9,6 @@
     <node pkg="create_2025_mp_server" type="right_move_rest_server.py" name="right_rest_server" output="screen"/>
     <node pkg="create_2025_mp_server" type="left_move_look_server.py" name="left_look_server" output="screen"/>
     <node pkg="create_2025_mp_server" type="right_move_look_server.py" name="right_look_server" output="screen"/>
-    <!-- <node pkg="create_2025_mp_server" type="left_pick_place_server_multistep_perception.py" name="left_pick_place_server" output="screen"/> -->
-    <node pkg="create_2025_mp_server" type="right_pick_place_server_multistep_perception.py" name="right_pick_place_server_testing" output="screen" />
+    <!-- <node pkg="create_2025_mp_server" type="left_pick_place_server_multistep_perception.py" name="left_pick_place_server" output="screen"/>
+    <node pkg="create_2025_mp_server" type="right_pick_place_server_multistep_perception.py" name="right_pick_place_server_testing" output="screen" /> -->
 </launch>

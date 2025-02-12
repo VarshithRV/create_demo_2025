@@ -75,6 +75,8 @@ class Motion_planner:
                 waypoints,  # waypoints to follow
                 0.005,  # eef_step
             )
+            # rospy.loginfo("Manually retiming the trajectory with velocity_scaling = 1, acceleration_scaling_factor = 0.5")
+            plan=self.move_group.retime_trajectory(self.move_group.get_current_state(),plan,velocity_scaling_factor = 1.0,algorithm="time_optimal_trajectory_generation")
         except Exception as e:
             print(e)
             return False
