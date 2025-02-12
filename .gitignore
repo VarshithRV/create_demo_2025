@@ -1,5 +1,6 @@
 */weights/*
 open_set_object_detection/scripts/weights/
+open_set_object_detection/scripts/inference_images/annotated*
 open_set_object_detection/scripts/*.pt*
 open_set_object_detection/scripts/groundingdino
 open_set_object_detection/scripts/assets/generated_image.jpeg

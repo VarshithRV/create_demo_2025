@@ -28,10 +28,10 @@ DROP_POSE.pose.orientation.w= 0.008127542614487311
 
 #### Define pick place orientation #######
 ORIENTATION_POSE = PoseStamped()
-ORIENTATION_POSE.pose.orientation.x= -0.7084016817823435
-ORIENTATION_POSE.pose.orientation.y= 0.7057186070566935
-ORIENTATION_POSE.pose.orientation.z= 0.007889737191896513
-ORIENTATION_POSE.pose.orientation.w= 0.008127542614487311
+ORIENTATION_POSE.pose.orientation.x= -0.9213484323776968
+ORIENTATION_POSE.pose.orientation.y= 0.38857296439791666
+ORIENTATION_POSE.pose.orientation.z= 0.00429333977367731
+ORIENTATION_POSE.pose.orientation.w= 0.010473047682687926
 
 
 #### World Z for different objects 
@@ -52,9 +52,10 @@ red_triangle_right_z = 0.25
 class CentralClient:
     def __init__(self) -> None:
         self.get_object_locations_service = rospy.ServiceProxy(
-            "get_object_locations",
+            "right_get_object_locations",
             GetObjectLocations
         )
+
         rospy.loginfo("Waiting for servers")
         self.right_pick_place_client = actionlib.SimpleActionClient("right_pick_place", PickPlaceAction)
         self.right_move_preaction_client = actionlib.SimpleActionClient("right_move_preaction", MovePreactionAction)
@@ -216,17 +217,16 @@ if __name__ == "__main__":
     rospy.sleep(0.1)
     
     # prompt = input("Enter the prompt : ")
-    prompt = "pick the green rectangle using the left arm"
+    prompt = "pick the blue circle using the left arm"
 
     set_io_client = rospy.ServiceProxy("/left/ur_hardware_interface/set_io", SetIO)
     set_io_client(1, 13, 1)
     rospy.sleep(0.5)
     time = rospy.Time.now()
-
     i = 0
-    while True :     
-        input(f"Press Enter to start iteration {i}")
+    while True:    
         i+=1
+        input(f"Enter to start iteration {i}")
         # move to the preaction position
         move_preaction_goal = MovePreactionActionGoal()
         central_client.left_move_rest_client.send_goal(move_preaction_goal)
@@ -235,34 +235,26 @@ if __name__ == "__main__":
         central_client.right_move_look_client.send_goal(move_preaction_goal)
         central_client.right_move_look_client.wait_for_result()
         move_preaction_result = central_client.right_move_look_client.get_result()
-
         rospy.sleep(0.2)
-
         rospy.loginfo("Calling the perception now")
         response = central_client.get_object_locations()
         rospy.loginfo(f"Perception finished in time : {rospy.Time.now() - time}")
-
         time1 = rospy.Time.now()
         set_io_client(1, 12, 0)
         # printing the object id and corresponding classes
         for object_thing in response.result.object_position:
             print("Object ID and class : ", object_thing.id, " ", object_thing.Class)
-
         # save response.result.object_position.image
         annotated_image = cv_bridge.CvBridge().imgmsg_to_cv2(response.result.image, desired_encoding="bgr8")
         cv2.imwrite("/home/barracuda/catkin_ws/src/create_2025_demo/central_scripts/scripts/object_image.png", annotated_image)
         print("Objects detected in time : ", rospy.Time.to_sec(rospy.Time.now()-time))
-
-
         time2 = rospy.Time.now()
         plan_actions = central_client.llm(prompt,response.result.object_position,annotated_image)
         object_list_left = plan_actions["pick_using_left_arm"]
         object_list_right = plan_actions["pick_using_right_arm"]
-
         # create the action list
         action_list_left = []
         action_list_right = []
-
         # action list 3D
         for object_id in object_list_left:
             source_object_id = object_id
@@ -271,27 +263,23 @@ if __name__ == "__main__":
             # source_object_position.pose.position.z -= 0.005
             # source_object_position.pose.position.x -= 0.005
             # source_object_position.pose.position.y += 0.01
-
             # top right
             # source_object_position.pose.position.z += -0.05
             # source_object_position.pose.position.x += 0.005
             # source_object_position.pose.position.y += 0.03
-            
+
             # top left
             # source_object_position.pose.position.z += -0.03
             # source_object_position.pose.position.x += -0.01
             # source_object_position.pose.position.y += 0.03
-
             # # bottom left
             # source_object_position.pose.position.z += -0.02
             # source_object_position.pose.position.x += -0.05
             # source_object_position.pose.position.y += 0.055
-
             # bottom right
             source_object_position.pose.position.z += 0.0
             source_object_position.pose.position.x += 0.0
             source_object_position.pose.position.y += 0.0
-
             # if response.result.object_position[object_id].Class == "green _ rectangle":
             #     source_object_position.pose.position.z = green_rectangle_left_z
             #     source_object_position.pose.position.x += 0
@@ -311,7 +299,6 @@ if __name__ == "__main__":
                 "target_object_position": destination_object_position
             }
             action_list_left.append(action_parsed)
-
         # action list in water
         for object_id in object_list_right:
             source_object_id = object_id
@@ -329,16 +316,14 @@ if __name__ == "__main__":
             #     source_object_position.pose.position.x += 0
             #     source_object_position.pose.position.y -= 0
             destination_object_position = DROP_POSE
+            source_object_position.pose.orientation = ORIENTATION_POSE.pose.orientation
             action_parsed = {
                 "source_object_position": source_object_position,
                 "target_object_position": destination_object_position
             }
             action_list_right.append(action_parsed)
 
-        # print(action_list_left)
-        # print(action_list_right)
-
-        input("Press Enter to continue ...")
+        # input("Press Enter to continue ...")
         central_client.execute_actions_right(action_list_right)
         central_client.execute_actions_left(action_list_left)
         rospy.loginfo(f"Total execution time is {rospy.Time.now()-time}")
