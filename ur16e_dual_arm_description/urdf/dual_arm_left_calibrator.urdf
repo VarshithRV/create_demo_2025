@@ -391,7 +391,7 @@
         <parent link="left_suction_gripper" />
         <child link="left_suction_gripper_poi" />
         <!-- <origin rpy="0 0 0" xyz="-0.004 -0.002 0.173" />  actual depth is 0.198 -->
-        <origin rpy="0 0 0" xyz="-0.003 -0.001 0.093" /> <!-- actual depth is 0.083 -->
+        <origin rpy="0 0 0" xyz="-0.003 -0.001 0.083" /> <!-- actual depth is 0.083 -->
     </joint>
     <!-- ROS-Industrial 'tool0' frame: all-zeros tool frame -->
     <link name="left_tool0" />

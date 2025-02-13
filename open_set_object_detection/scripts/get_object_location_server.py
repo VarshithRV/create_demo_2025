@@ -20,7 +20,8 @@ import os
 ####### model parameters threshold ########
 BOX_THRESHOLD = 0.35
 TEXT_THRESHOLD = 0.25
-TEXT_PROMPT = "colored shapes"
+TEXT_PROMPT = "blue_circle.red_triangle.green_square"
+# TEXT_PROMPT = "colored shape"
 ###########################################
 
 ####### camera identifiers ################
