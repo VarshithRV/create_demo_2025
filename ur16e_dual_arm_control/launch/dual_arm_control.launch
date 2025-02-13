@@ -8,6 +8,8 @@
   <arg name="right_script_sender_port" default="60002"/>
   <arg name="right_trajectory_port" default="60003"/>
   <arg name="right_script_command_port" default="60004"/>
+  <arg name="right_controllers" default="joint_state_controller scaled_pos_joint_traj_controller speed_scaling_state_controller force_torque_sensor_controller"/>
+  <arg name="right_stopped_controllers" default="joint_group_vel_controller  pos_joint_traj_controller twist_controller"/>
 
   <!--left's arguments-->
   <arg name="left_kinematics" default="$(find ur16e_dual_arm_control)/etc/left_ur16e_kinematics_configuration.yaml"/>
@@ -17,6 +19,8 @@
   <arg name="left_script_sender_port" default="50002"/>
   <arg name="left_trajectory_port" default="50003"/>
   <arg name="left_script_command_port" default="50004"/>
+  <arg name="left_controllers" default="joint_state_controller scaled_pos_joint_traj_controller speed_scaling_state_controller force_torque_sensor_controller"/>
+  <arg name="left_stopped_controllers" default="joint_group_vel_controller  pos_joint_traj_controller twist_controller"/>
 
   <!--common arguments-->
   <arg name="use_tool_communication" default="false"/>
@@ -41,8 +45,8 @@
       <arg name="script_command_port" value="$(arg right_script_command_port)"/>
       <arg name="kinematics_config" value="$(arg right_kinematics)"/>
       <arg name="tf_prefix" value="right_"/>
-      <arg name="controllers" value="$(arg controllers)"/>
-      <arg name="stopped_controllers" value="$(arg stopped_controllers)"/>
+      <arg name="controllers" value="$(arg right_controllers)"/>
+      <arg name="stopped_controllers" value="$(arg right_stopped_controllers)"/>
     </include>
   </group>
 
@@ -59,8 +63,8 @@
       <arg name="script_command_port" value="$(arg left_script_command_port)"/>
       <arg name="kinematics_config" value="$(arg left_kinematics)"/>
       <arg name="tf_prefix" value="left_"/>
-      <arg name="controllers" value="$(arg controllers)"/>
-      <arg name="stopped_controllers" value="$(arg stopped_controllers)"/>
+      <arg name="controllers" value="$(arg left_controllers)"/>
+      <arg name="stopped_controllers" value="$(arg left_stopped_controllers)"/>
     </include>
   </group>
 

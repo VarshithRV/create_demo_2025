@@ -140,7 +140,7 @@ forward_cartesian_traj_controller:
 
 twist_controller:
   type: "ros_controllers_cartesian/TwistController"
-  frame_id: "tool0_controller"
+  frame_id: "tright_tool0_controller"
   publish_rate: *loop_hz
   joints: *robot_joints
 
