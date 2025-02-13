@@ -258,7 +258,7 @@ class Motion_planner:
         waypoints  = []
         initial_pose = self.move_group.get_current_pose().pose
         pick = copy.deepcopy(object_pose)
-        pick.position.z += 0.025
+        pick.position.z += 0.05
         pick.orientation = start.pose.orientation
         correction = copy.deepcopy(pick)
         correction.position.z = initial_pose.position.z
