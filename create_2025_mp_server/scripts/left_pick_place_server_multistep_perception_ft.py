@@ -22,9 +22,13 @@ from geometry_msgs.msg import WrenchStamped, Twist
 # move up or down, set gripper value, time before activating gripper and moving
 FT_SETPOINT = 4.0
 ERROR_ALLOWANCE = 1.0
+GROUND_CLEARANCE = 0.05
+VELOCITY_z = -0.01
 P = 1
 I = 1
 D = 1
+PICK_PLACE_HEIGHT = 0.3
+LOOK_HEIGHT = 0.23
 
 class Motion_planner:
 
@@ -107,7 +111,7 @@ class Motion_planner:
     def PID(self):
         error = FT_SETPOINT - self.force_z
         if error > ERROR_ALLOWANCE:
-            self.command_vel.linear.z = -0.01
+            self.command_vel.linear.z = VELOCITY_z
         else :
             self.command_vel.linear.z = 0.0
 
@@ -123,6 +127,9 @@ class Motion_planner:
             switch_controller_response = self.switch_controller(switch_controller_msg)
         except Exception as e:
             rospy.logerr(f"error occurred while switching controllers = {e}")
+        if not switch_controller_response.ok:
+            rospy.logerr("Switch controller failed to switch to twist controller")
+            return None
         rospy.loginfo("Controller switched")
 
         rate = rospy.Rate(30)
@@ -133,6 +140,8 @@ class Motion_planner:
         rospy.loginfo("Zeroeing ft sensor")
         try:
             zero_ftsensor_response = self.zero_ftsensor(trigger)
+            if not zero_ftsensor_response.success :
+                rospy.logwarn("Couldn't zero ft sensor beforehand")
         except Exception as e:
             rospy.logerr(f"error occurred while zeroeing ft = {e}")
 
@@ -158,6 +167,9 @@ class Motion_planner:
             switch_controller_response = self.switch_controller(switch_controller_msg)
         except Exception as e:
             rospy.logerr(f"error occurred while switching controllers = {e}")
+        if not switch_controller_response.ok:
+            rospy.logerr("Switch controller failed to switch to twist controller")
+            return None
         rospy.loginfo("Controller switched")
         return True
     
@@ -212,8 +224,8 @@ class Motion_planner:
     def pick_and_place(self,start:PoseStamped, end:PoseStamped):
         rospy.loginfo("Started pick and place with start : %s and end : %s", start, end)
 
-        pick_place_height = 0.3
-        look_height = 0.25
+        pick_place_height = PICK_PLACE_HEIGHT
+        look_height = LOOK_HEIGHT
 
         # plan a cartesian path to pick, prepick -> pick
         waypoints = []
@@ -258,7 +270,7 @@ class Motion_planner:
         waypoints  = []
         initial_pose = self.move_group.get_current_pose().pose
         pick = copy.deepcopy(object_pose)
-        pick.position.z += 0.05
+        pick.position.z += GROUND_CLEARANCE
         pick.orientation = start.pose.orientation
         correction = copy.deepcopy(pick)
         correction.position.z = initial_pose.position.z
