@@ -10,7 +10,7 @@ from tf.transformations import *
 
 
 base_frame = "left_base_link"
-EE_frame = "left_wrist_3_link"
+EE_frame = "left_tool0_controller"
 
 class UR16eCalibration:
     def __init__(self):
@@ -105,7 +105,7 @@ class UR16eCalibration:
 
         while not rospy.is_shutdown():
             publisher.publish(msg)
-            rate.sleep()        
+            rate.sleep()
 
 if __name__ == "__main__":
     calib = UR16eCalibration()

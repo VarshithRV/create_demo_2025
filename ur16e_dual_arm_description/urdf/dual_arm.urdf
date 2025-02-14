@@ -803,7 +803,7 @@
     <joint name="world_to_left" type="fixed">
         <parent link="world" />
         <child link="left_base_link" />
-        <origin rpy="-0.008 0.002 2.237" xyz="-0.498 0.530 0.005" />
+        <origin rpy="0.0030070500195190893 -0.0073779695804560555 1.561587737833231" xyz="-0.3906717303685856 0.4086080874800634 0.009765414138713466" />
     </joint>
     <joint name="world_to_right" type="fixed">
         <parent link="world" />

@@ -2,7 +2,7 @@
 <launch>
     <group ns="right">
         <include file="$(find realsense2_camera)/launch/rs_aligned_depth.launch">
-            <arg name="camera" value="rs_415" />
+            <arg name="camera" value="rs_415_right" />
             <arg name="serial_no" value="210622060509" />
             <arg name="color_width" value="1280" />
             <arg name="color_height" value="720" />

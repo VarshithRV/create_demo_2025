@@ -1,0 +1,5 @@
+At time 1739549439.795
+- Translation: [0.575, 0.521, -0.009]
+- Rotation: in Quaternion [-0.016, 0.002, -0.715, 0.699]
+            in RPY (radian) [-0.025, -0.021, -1.592]
+            in RPY (degree) [-1.432, -1.199, -91.239]

@@ -25,8 +25,8 @@ TEXT_PROMPT = "blue_circle.red_triangle.green_square"
 ###########################################
 
 ####### camera identifiers ################
-LEFT_CAMERA = "rs_415"
-RIGHT_CAMERA = "rs_435i"
+LEFT_CAMERA = "rs_415_left"
+RIGHT_CAMERA = "rs_415_right"
 ###########################################
 
 class Deprojection:
