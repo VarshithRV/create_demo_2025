@@ -20,10 +20,10 @@ from geometry_msgs.msg import WrenchStamped, Twist
 
 ### variable bound for change
 # move up or down, set gripper value, time before activating gripper and moving
-FT_SETPOINT = 4.0
+FT_SETPOINT = 8.0
 ERROR_ALLOWANCE = 1.0
 GROUND_CLEARANCE = 0.05
-VELOCITY_z = -0.01
+VELOCITY_z = -0.02
 P = 1
 I = 1
 D = 1
@@ -297,7 +297,7 @@ class Motion_planner:
         waypoints = []
         current_pose = self.move_group.get_current_pose().pose
         waypoints.append(copy.deepcopy(current_pose))
-        waypoints.append(copy.deepcopy(prepick))
+        waypoints.append(copy.deepcopy(correction))
         self.execute_waypoints(waypoints)
         rospy.sleep(0.2)
         

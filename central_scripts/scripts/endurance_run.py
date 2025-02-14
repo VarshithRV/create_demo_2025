@@ -52,7 +52,7 @@ red_triangle_right_z = 0.25
 class CentralClient:
     def __init__(self) -> None:
         self.get_object_locations_service = rospy.ServiceProxy(
-            "right_get_object_locations",
+            "left_get_object_locations",
             GetObjectLocations
         )
 
@@ -147,9 +147,9 @@ class CentralClient:
     def execute_actions_right(self, action_list):
         rospy.loginfo("Sending move preaction goal")
         move_preaction_goal = MovePreactionActionGoal()
-        self.right_move_look_client.send_goal(move_preaction_goal)
-        self.right_move_look_client.wait_for_result()
-        move_preaction_result = self.right_move_look_client.get_result()
+        self.right_move_rest_client.send_goal(move_preaction_goal)
+        self.right_move_rest_client.wait_for_result()
+        move_preaction_result = self.right_move_rest_client.get_result()
         self.left_move_rest_client.send_goal(move_preaction_goal)
         self.left_move_rest_client.wait_for_result()
         move_preaction_result = self.left_move_rest_client.get_result()
@@ -216,8 +216,7 @@ if __name__ == "__main__":
     central_client = CentralClient()
     rospy.sleep(0.1)
     
-    # prompt = input("Enter the prompt : ")
-    prompt = "pick the blue circle using the left arm"
+    # prompt = "pick the blue circle using the left arm"
 
     set_io_client = rospy.ServiceProxy("/left/ur_hardware_interface/set_io", SetIO)
     set_io_client(1, 13, 1)
@@ -226,15 +225,16 @@ if __name__ == "__main__":
     i = 0
     while True:    
         i+=1
-        input(f"Enter to start iteration {i}")
+        prompt = input("Enter the prompt : ")
+        # input(f"Enter to start iteration {i}")
         # move to the preaction position
         move_preaction_goal = MovePreactionActionGoal()
-        central_client.left_move_rest_client.send_goal(move_preaction_goal)
-        central_client.left_move_rest_client.wait_for_result()
-        move_preaction_result = central_client.left_move_rest_client.get_result()
-        central_client.right_move_look_client.send_goal(move_preaction_goal)
-        central_client.right_move_look_client.wait_for_result()
-        move_preaction_result = central_client.right_move_look_client.get_result()
+        central_client.right_move_rest_client.send_goal(move_preaction_goal)
+        central_client.right_move_rest_client.wait_for_result()
+        move_preaction_result = central_client.right_move_rest_client.get_result()
+        central_client.left_move_look_client.send_goal(move_preaction_goal)
+        central_client.left_move_look_client.wait_for_result()
+        move_preaction_result = central_client.left_move_look_client.get_result()
         rospy.sleep(0.2)
         rospy.loginfo("Calling the perception now")
         response = central_client.get_object_locations()
@@ -317,6 +317,7 @@ if __name__ == "__main__":
             #     source_object_position.pose.position.y -= 0
             destination_object_position = DROP_POSE
             source_object_position.pose.orientation = ORIENTATION_POSE.pose.orientation
+            source_object_position.pose.position.z += 0.002
             action_parsed = {
                 "source_object_position": source_object_position,
                 "target_object_position": destination_object_position
