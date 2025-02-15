@@ -7,7 +7,7 @@ import geometry_msgs.msg
 from open_set_object_detection_msgs.srv import GetObjectLocations, GetObjectLocationsResponse
 from math import pi, tau, dist, fabs, cos
 from std_msgs.msg import String
-from moveit_commander.conversions import pose_to_list
+# from moveit_commander.conversions import pose_to_list
 from geometry_msgs.msg import PointStamped, Pose, PoseStamped
 from tf.transformations import quaternion_from_euler, quaternion_multiply
 from std_srvs.srv import SetBool
@@ -22,8 +22,8 @@ from geometry_msgs.msg import WrenchStamped, Twist
 # move up or down, set gripper value, time before activating gripper and moving
 FT_SETPOINT = 8.0
 ERROR_ALLOWANCE = 1.0
-GROUND_CLEARANCE = 0.05
-VELOCITY_z = -0.02
+OBJECT_CLEARANCE = 0.05
+VELOCITY_Z = -0.02
 P = 1
 I = 1
 D = 1
@@ -111,7 +111,7 @@ class Motion_planner:
     def PID(self):
         error = FT_SETPOINT - self.force_z
         if error > ERROR_ALLOWANCE:
-            self.command_vel.linear.z = VELOCITY_z
+            self.command_vel.linear.z = VELOCITY_Z
         else :
             self.command_vel.linear.z = 0.0
 
@@ -270,7 +270,7 @@ class Motion_planner:
         waypoints  = []
         initial_pose = self.move_group.get_current_pose().pose
         pick = copy.deepcopy(object_pose)
-        pick.position.z += GROUND_CLEARANCE
+        pick.position.z += OBJECT_CLEARANCE
         pick.orientation = start.pose.orientation
         correction = copy.deepcopy(pick)
         correction.position.z = initial_pose.position.z

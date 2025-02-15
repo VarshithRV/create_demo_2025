@@ -6,7 +6,7 @@ import moveit_msgs.msg
 import geometry_msgs.msg
 from math import pi, tau, dist, fabs, cos
 from std_msgs.msg import String
-from moveit_commander.conversions import pose_to_list
+# from moveit_commander.conversions import pose_to_list
 from geometry_msgs.msg import PointStamped, Pose
 from tf.transformations import quaternion_from_euler, quaternion_multiply
 from std_srvs.srv import SetBool
@@ -15,7 +15,7 @@ from create_2025_mp_server_msgs.msg import MovePreactionAction, MovePreactionAct
 import actionlib
 
 ## create 6 literals for joint states ###
-JOINT_STATE = [1.1678316593170166, -1.108215646152832, 0.5274646917926233, -0.9895880979350586, -1.5686934630023401, 2.646984338760376]
+JOINT_STATE = [-1.380310360585348, -1.3785666835359116, 0.501263443623678, -0.6662662786296387, -1.5471051375018519, 0.9651387929916382]
 
 
 class Motion_planner:

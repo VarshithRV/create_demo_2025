@@ -7,7 +7,7 @@ import geometry_msgs.msg
 from open_set_object_detection_msgs.srv import GetObjectLocations, GetObjectLocationsResponse
 from math import pi, tau, dist, fabs, cos
 from std_msgs.msg import String
-from moveit_commander.conversions import pose_to_list
+# from moveit_commander.conversions import pose_to_list
 from geometry_msgs.msg import PointStamped, Pose, PoseStamped
 from tf.transformations import quaternion_from_euler, quaternion_multiply
 from std_srvs.srv import SetBool
@@ -17,6 +17,8 @@ from ur_msgs.srv import SetIO
 
 ### variable bound for change
 # move up or down, set gripper value, time before activating gripper and moving
+PICK_PLACE_HEIGHT = 0.3
+LOOK_HEIGHT = 0.23
 
 class Motion_planner:
 
@@ -121,8 +123,8 @@ class Motion_planner:
     def pick_and_place(self,start:PoseStamped, end:PoseStamped):
         rospy.loginfo("Started pick and place with start : %s and end : %s", start, end)
 
-        pick_place_height = 0.3
-        look_height = 0.25
+        pick_place_height = PICK_PLACE_HEIGHT
+        look_height = LOOK_HEIGHT
 
         # plan a cartesian path to pick, prepick -> pick
         waypoints = []

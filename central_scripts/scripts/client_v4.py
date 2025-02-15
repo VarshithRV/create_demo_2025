@@ -17,9 +17,9 @@ from ur_msgs.srv import SetIO
 
 #### Define drope pose #########
 DROP_POSE = PoseStamped()
-DROP_POSE.pose.position.x= 0.1538011876457178
-DROP_POSE.pose.position.y= 0.5658817694268432
-DROP_POSE.pose.position.z= 0.15632227392144177
+DROP_POSE.pose.position.x= 0.08086503905922947
+DROP_POSE.pose.position.y= 0.34706300699744835
+DROP_POSE.pose.position.z= 0.16728816417432144
 DROP_POSE.pose.orientation.x= -0.7084016817823435
 DROP_POSE.pose.orientation.y= 0.7057186070566935
 DROP_POSE.pose.orientation.z= 0.007889737191896513
@@ -27,11 +27,17 @@ DROP_POSE.pose.orientation.w= 0.008127542614487311
 #################################
 
 #### Define pick place orientation #######
-ORIENTATION_POSE = PoseStamped()
-ORIENTATION_POSE.pose.orientation.x= -0.9213484323776968
-ORIENTATION_POSE.pose.orientation.y= 0.38857296439791666
-ORIENTATION_POSE.pose.orientation.z= 0.00429333977367731
-ORIENTATION_POSE.pose.orientation.w= 0.010473047682687926
+RIGHT_ORIENTATION_POSE = PoseStamped()
+RIGHT_ORIENTATION_POSE.pose.orientation.x= 0.9249979193911206
+RIGHT_ORIENTATION_POSE.pose.orientation.y= 0.37870228331576833
+RIGHT_ORIENTATION_POSE.pose.orientation.z= 0.006072967790886044
+RIGHT_ORIENTATION_POSE.pose.orientation.w= 0.030439264047149677
+
+LEFT_ORIENTATION_POSE = PoseStamped()
+LEFT_ORIENTATION_POSE.pose.orientation.x= -0.7155827316851596
+LEFT_ORIENTATION_POSE.pose.orientation.y= 0.6984547202623914
+LEFT_ORIENTATION_POSE.pose.orientation.z= 0.006746409566624969
+LEFT_ORIENTATION_POSE.pose.orientation.w= 0.00753948374552216
 
 
 #### World Z for different objects 
@@ -289,8 +295,9 @@ if __name__ == "__main__":
         #     source_object_position.pose.position.z = blue_circle_left_z
         #     source_object_position.pose.position.x += 0
         #     source_object_position.pose.position.y -= 0
-        source_object_position.pose.orientation = ORIENTATION_POSE.pose.orientation
+        source_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
         destination_object_position = DROP_POSE
+        destination_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
         action_parsed = {
             "source_object_position": source_object_position,
             "target_object_position": destination_object_position
@@ -313,7 +320,8 @@ if __name__ == "__main__":
         #     source_object_position.pose.position.x += 0
         #     source_object_position.pose.position.y -= 0
         destination_object_position = DROP_POSE
-        source_object_position.pose.orientation = ORIENTATION_POSE.pose.orientation
+        source_object_position.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
+        destination_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
         action_parsed = {
             "source_object_position": source_object_position,
             "target_object_position": destination_object_position
