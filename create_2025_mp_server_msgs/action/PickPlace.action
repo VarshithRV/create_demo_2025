@@ -1,5 +1,6 @@
 geometry_msgs/PoseStamped source
 geometry_msgs/PoseStamped destination
+std_msgs/String prompt
 ---
 bool result
 ---

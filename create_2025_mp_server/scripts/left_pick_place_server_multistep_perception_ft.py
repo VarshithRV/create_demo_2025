@@ -208,8 +208,9 @@ class Motion_planner:
         rospy.loginfo("Received pick and place goal")
         start = goal.source
         end = goal.destination
+        prompt = goal.prompt
         
-        success = self.pick_and_place(start, end)
+        success = self.pick_and_place(start, end, prompt)
         
         # set goal to success
         result = PickPlaceActionResult()
@@ -221,7 +222,7 @@ class Motion_planner:
             self.pick_place_server.set_aborted(result)
 
 
-    def pick_and_place(self,start:PoseStamped, end:PoseStamped):
+    def pick_and_place(self,start:PoseStamped, end:PoseStamped, prompt:String):
         rospy.loginfo("Started pick and place with start : %s and end : %s", start, end)
 
         pick_place_height = PICK_PLACE_HEIGHT
@@ -253,7 +254,7 @@ class Motion_planner:
 
         # call the perception here
         response = GetObjectLocationsResponse()
-        response = self.left_get_object_locations_service()
+        response = self.left_get_object_locations_service(prompt)
         if response is not None :
             pass
         else :
