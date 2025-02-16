@@ -277,4 +277,5 @@ if __name__ == "__main__":
     input("Press Enter to continue ...")
     central_client.execute_actions_right(action_list_right)
     central_client.execute_actions_left(action_list_left)
+    # confusing extra comment
     rospy.loginfo(f"Total execution time is {rospy.Time.now()-time}")
