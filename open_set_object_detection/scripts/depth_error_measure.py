@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import time
+import seaborn as sns
 
 depth_data_list = []
 bridge = CvBridge()
@@ -61,7 +62,6 @@ def main():
     
     # Plot continuous frequency distribution (Kernel Density Estimate)
     plt.figure(figsize=(8, 6))
-    import seaborn as sns
     sns.kdeplot(rmse_depth.flatten(), fill=True, color='blue', alpha=0.7)
     plt.xlabel("Depth Error Value")
     plt.ylabel("Density")

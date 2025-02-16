@@ -1,5 +1,5 @@
 import rospy
-from open_set_object_detection_msgs.srv import GetObjectLocations, GetObjectLocationsResponse
+from open_set_object_detection_msgs.srv import GetObjectLocations, GetObjectLocationsResponse, GetObjectLocationsRequest
 import cv_bridge
 import cv2
 from PIL import Image
@@ -39,26 +39,12 @@ LEFT_ORIENTATION_POSE.pose.orientation.y= 0.6984547202623914
 LEFT_ORIENTATION_POSE.pose.orientation.z= 0.006746409566624969
 LEFT_ORIENTATION_POSE.pose.orientation.w= 0.00753948374552216
 
-
-#### World Z for different objects 
-# blue_circle_dry_z = 0.15199
-# green_rectangle_dry_z = 0.1431
-# red_triangle_dry_z = 0.1471
-# blue_circle_water_z = 0.15199
-# green_rectangle_water_z = 0.1431
-# red_triangle_water_z = 0.1471
-blue_circle_left_z = 0.25
-green_rectangle_left_z = 0.25
-red_triangle_left_z = 0.25
-blue_circle_right_z = 0.25
-green_rectangle_right_z = 0.25
-red_triangle_right_z = 0.25
-##################################
+TEXT_PROMPT = "blue_circle.red_triangle.green_square"
 
 class CentralClient:
     def __init__(self) -> None:
         self.get_object_locations_service = rospy.ServiceProxy(
-            "right_get_object_locations",
+            "left_get_object_locations",
             GetObjectLocations
         )
 
@@ -84,7 +70,9 @@ class CentralClient:
 
     def get_object_locations(self):
         try:
-            response = self.get_object_locations_service()
+            request = GetObjectLocationsRequest()
+            request.prompt.data = TEXT_PROMPT
+            response = self.get_object_locations_service(request)
             return response
         except rospy.ServiceException as e:
             print(f"Service call failed: {e}")
@@ -232,12 +220,12 @@ if __name__ == "__main__":
         
     # move to the preaction position
     move_preaction_goal = MovePreactionActionGoal()
-    central_client.left_move_rest_client.send_goal(move_preaction_goal)
-    central_client.left_move_rest_client.wait_for_result()
-    move_preaction_result = central_client.left_move_rest_client.get_result()
-    central_client.right_move_look_client.send_goal(move_preaction_goal)
-    central_client.right_move_look_client.wait_for_result()
-    move_preaction_result = central_client.right_move_look_client.get_result()
+    central_client.right_move_rest_client.send_goal(move_preaction_goal)
+    central_client.right_move_rest_client.wait_for_result()
+    move_preaction_result = central_client.right_move_rest_client.get_result()
+    central_client.left_move_look_client.send_goal(move_preaction_goal)
+    central_client.left_move_look_client.wait_for_result()
+    move_preaction_result = central_client.left_move_look_client.get_result()
     rospy.sleep(0.2)
     rospy.loginfo("Calling the perception now")
     response = central_client.get_object_locations()
@@ -262,39 +250,9 @@ if __name__ == "__main__":
     for object_id in object_list_left:
         source_object_id = object_id
         source_object_position = response.result.object_position[object_id].pose
-        # middle
-        # source_object_position.pose.position.z -= 0.005
-        # source_object_position.pose.position.x -= 0.005
-        # source_object_position.pose.position.y += 0.01
-        # top right
-        # source_object_position.pose.position.z += -0.05
-        # source_object_position.pose.position.x += 0.005
-        # source_object_position.pose.position.y += 0.03
-        
-        # top left
-        # source_object_position.pose.position.z += -0.03
-        # source_object_position.pose.position.x += -0.01
-        # source_object_position.pose.position.y += 0.03
-        # # bottom left
-        # source_object_position.pose.position.z += -0.02
-        # source_object_position.pose.position.x += -0.05
-        # source_object_position.pose.position.y += 0.055
-        # bottom right
         source_object_position.pose.position.z += 0.0
         source_object_position.pose.position.x += 0.0
         source_object_position.pose.position.y += 0.0
-        # if response.result.object_position[object_id].Class == "green _ rectangle":
-        #     source_object_position.pose.position.z = green_rectangle_left_z
-        #     source_object_position.pose.position.x += 0
-        #     source_object_position.pose.position.y -= 0
-        # if response.result.object_position[object_id].Class == "red _ triangle":
-        #     source_object_position.pose.position.z = red_triangle_left_z
-        #     source_object_position.pose.position.x += 0
-        #     source_object_position.pose.position.y -= 0
-        # if response.result.object_position[object_id].Class == "blue _ circle":
-        #     source_object_position.pose.position.z = blue_circle_left_z
-        #     source_object_position.pose.position.x += 0
-        #     source_object_position.pose.position.y -= 0
         source_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
         destination_object_position = DROP_POSE
         destination_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
@@ -307,18 +265,6 @@ if __name__ == "__main__":
     for object_id in object_list_right:
         source_object_id = object_id
         source_object_position = response.result.object_position[object_id].pose
-        # if response.result.object_position[object_id].Class == "green _ rectangle":
-        #     source_object_position.pose.position.z = green_rectangle_right_z
-        #     source_object_position.pose.position.x += 0
-        #     source_object_position.pose.position.y -= 0
-        # if response.result.object_position[object_id].Class == "red _ triangle":
-        #     source_object_position.pose.position.z = red_triangle_right_z
-        #     source_object_position.pose.position.x += 0
-        #     source_object_position.pose.position.y -= 0
-        # if response.result.object_position[object_id].Class == "blue _ circle":
-        #     source_object_position.pose.position.z = blue_circle_right_z
-        #     source_object_position.pose.position.x += 0
-        #     source_object_position.pose.position.y -= 0
         destination_object_position = DROP_POSE
         source_object_position.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
         destination_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
