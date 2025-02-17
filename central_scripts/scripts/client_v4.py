@@ -28,16 +28,16 @@ DROP_POSE.pose.orientation.w= 0.008127542614487311
 
 #### Define pick place orientation #######
 RIGHT_ORIENTATION_POSE = PoseStamped()
-RIGHT_ORIENTATION_POSE.pose.orientation.x= 0.9249979193911206
-RIGHT_ORIENTATION_POSE.pose.orientation.y= 0.37870228331576833
-RIGHT_ORIENTATION_POSE.pose.orientation.z= 0.006072967790886044
-RIGHT_ORIENTATION_POSE.pose.orientation.w= 0.030439264047149677
+RIGHT_ORIENTATION_POSE.pose.orientation.x = 0.9168428669078561
+RIGHT_ORIENTATION_POSE.pose.orientation.y = 0.3981116253989925
+RIGHT_ORIENTATION_POSE.pose.orientation.z = 0.004269784548492005
+RIGHT_ORIENTATION_POSE.pose.orientation.w = 0.029800336613282526
 
 LEFT_ORIENTATION_POSE = PoseStamped()
-LEFT_ORIENTATION_POSE.pose.orientation.x= -0.7155827316851596
-LEFT_ORIENTATION_POSE.pose.orientation.y= 0.6984547202623914
-LEFT_ORIENTATION_POSE.pose.orientation.z= 0.006746409566624969
-LEFT_ORIENTATION_POSE.pose.orientation.w= 0.00753948374552216
+LEFT_ORIENTATION_POSE.pose.orientation.x= -0.6955566827400104
+LEFT_ORIENTATION_POSE.pose.orientation.y= -0.7184260972597232
+LEFT_ORIENTATION_POSE.pose.orientation.z= -0.006965116877090745
+LEFT_ORIENTATION_POSE.pose.orientation.w= 0.004041165520492587
 
 TEXT_PROMPT = "blue_circle.red_triangle.green_square"
 
@@ -141,8 +141,8 @@ class CentralClient:
     def execute_actions_right(self, action_list):
         rospy.loginfo("Sending move preaction goal")
         move_preaction_goal = MovePreactionActionGoal()
-        self.right_move_look_client.send_goal(move_preaction_goal)
-        self.right_move_look_client.wait_for_result()
+        self.right_move_rest_client.send_goal(move_preaction_goal)
+        self.right_move_rest_client.wait_for_result()
         move_preaction_result = self.right_move_look_client.get_result()
         self.left_move_rest_client.send_goal(move_preaction_goal)
         self.left_move_rest_client.wait_for_result()
@@ -253,8 +253,8 @@ if __name__ == "__main__":
         source_object_position.pose.position.z += 0.0
         source_object_position.pose.position.x += 0.0
         source_object_position.pose.position.y += 0.0
-        source_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
         destination_object_position = DROP_POSE
+        source_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
         destination_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
         action_parsed = {
             "source_object_position": source_object_position,
@@ -267,7 +267,7 @@ if __name__ == "__main__":
         source_object_position = response.result.object_position[object_id].pose
         destination_object_position = DROP_POSE
         source_object_position.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
-        destination_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
+        destination_object_position.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
         action_parsed = {
             "source_object_position": source_object_position,
             "target_object_position": destination_object_position

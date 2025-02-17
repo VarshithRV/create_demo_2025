@@ -20,10 +20,10 @@ from geometry_msgs.msg import WrenchStamped, Twist
 
 ### variable bound for change
 # move up or down, set gripper value, time before activating gripper and moving
-FT_SETPOINT = 8.0
+FT_SETPOINT = 64
 ERROR_ALLOWANCE = 1.0
 OBJECT_CLEARANCE = 0.05
-VELOCITY_Z = -0.02
+VELOCITY_Z = -0.015
 P = 1
 I = 1
 D = 1
@@ -110,7 +110,7 @@ class Motion_planner:
 
     def PID(self):
         error = FT_SETPOINT - self.force_z
-        if error > ERROR_ALLOWANCE:
+        if error > 0:
             self.command_vel.linear.z = VELOCITY_Z
         else :
             self.command_vel.linear.z = 0.0
@@ -234,7 +234,7 @@ class Motion_planner:
         prepick = Pose()
         prepick = copy.deepcopy(start.pose)
         prepick.position.z = pick_place_height
-        prepick.position.y += 0.05 # for the camera to stare at the object
+        prepick.position.y += 0.1 # for the camera to stare at the object
         waypoints.append(copy.deepcopy(initial_pose))
         waypoints.append(copy.deepcopy(prepick))
         
@@ -271,6 +271,8 @@ class Motion_planner:
         waypoints  = []
         initial_pose = self.move_group.get_current_pose().pose
         pick = copy.deepcopy(object_pose)
+        pick.position.x += -0.01
+        pick.position.y += -0.005
         pick.position.z += OBJECT_CLEARANCE
         pick.orientation = start.pose.orientation
         correction = copy.deepcopy(pick)

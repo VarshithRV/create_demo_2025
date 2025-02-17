@@ -41,7 +41,7 @@ class Deprojection:
         self.recursion = 0
         self.source_image_path = "assets/generated_image.jpeg"
         # Load the Grounding Dino model
-        self.model = load_model("/home/barracuda/open_house_ws/src/create_demo_2025/open_set_object_detection/scripts/groundingdino/config/GroundingDINO_SwinT_OGC.py", "/home/bararcuda/open_house_ws/src/create_demo_2025/open_set_object_detection/scripts/weights/groundingdino_swint_ogc.pth")
+        self.model = load_model("groundingdino/config/GroundingDINO_SwinT_OGC.py", "weights/groundingdino_swint_ogc.pth")
         rospy.loginfo("Loaded the Grounding Dino model")
 
         # Camera topics

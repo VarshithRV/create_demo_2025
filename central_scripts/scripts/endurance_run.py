@@ -1,5 +1,5 @@
 import rospy
-from open_set_object_detection_msgs.srv import GetObjectLocations, GetObjectLocationsResponse
+from open_set_object_detection_msgs.srv import GetObjectLocations, GetObjectLocationsResponse, GetObjectLocationsRequest
 import cv_bridge
 import cv2
 from PIL import Image
@@ -8,12 +8,14 @@ import base64
 import json
 import requests
 from geometry_msgs.msg import PointStamped, Pose, PoseStamped
+from std_msgs.msg import String
 from create_2025_mp_server_msgs.msg import PickPlaceAction, PickPlaceGoal, PickPlaceResult
 from create_2025_mp_server_msgs.msg import MovePreactionAction, MovePreactionActionGoal, MovePreactionActionResult
 import actionlib
 from openai import OpenAI
 import numpy as np
 from ur_msgs.srv import SetIO
+import sys
 
 #### Define drope pose #########
 DROP_POSE = PoseStamped()
@@ -28,32 +30,18 @@ DROP_POSE.pose.orientation.w= 0.008127542614487311
 
 #### Define pick place orientation #######
 RIGHT_ORIENTATION_POSE = PoseStamped()
-RIGHT_ORIENTATION_POSE.pose.orientation.x= 0.9249979193911206
-RIGHT_ORIENTATION_POSE.pose.orientation.y= 0.37870228331576833
-RIGHT_ORIENTATION_POSE.pose.orientation.z= 0.006072967790886044
-RIGHT_ORIENTATION_POSE.pose.orientation.w= 0.030439264047149677
+RIGHT_ORIENTATION_POSE.pose.orientation.x = 0.9168428669078561
+RIGHT_ORIENTATION_POSE.pose.orientation.y = 0.3981116253989925
+RIGHT_ORIENTATION_POSE.pose.orientation.z = 0.004269784548492005
+RIGHT_ORIENTATION_POSE.pose.orientation.w = 0.029800336613282526
 
 LEFT_ORIENTATION_POSE = PoseStamped()
-LEFT_ORIENTATION_POSE.pose.orientation.x=-0.6978770694734703
-LEFT_ORIENTATION_POSE.pose.orientation.y=-0.7161478839114117
-LEFT_ORIENTATION_POSE.pose.orientation.z=-0.007483290880535
-LEFT_ORIENTATION_POSE.pose.orientation.w=0.00661850662355466
+LEFT_ORIENTATION_POSE.pose.orientation.x= -0.6955566827400104
+LEFT_ORIENTATION_POSE.pose.orientation.y= -0.7184260972597232
+LEFT_ORIENTATION_POSE.pose.orientation.z= -0.006965116877090745
+LEFT_ORIENTATION_POSE.pose.orientation.w= 0.004041165520492587
 
-
-#### World Z for different objects 
-# blue_circle_dry_z = 0.15199
-# green_rectangle_dry_z = 0.1431
-# red_triangle_dry_z = 0.1471
-# blue_circle_water_z = 0.15199
-# green_rectangle_water_z = 0.1431
-# red_triangle_water_z = 0.1471
-blue_circle_left_z = 0.25
-green_rectangle_left_z = 0.25
-red_triangle_left_z = 0.25
-blue_circle_right_z = 0.25
-green_rectangle_right_z = 0.25
-red_triangle_right_z = 0.25
-##################################
+TEXT_PROMPT = "blue_circle.red_triangle.green_square"
 
 class CentralClient:
     def __init__(self) -> None:
@@ -84,7 +72,10 @@ class CentralClient:
 
     def get_object_locations(self):
         try:
-            response = self.get_object_locations_service()
+            request = GetObjectLocationsRequest()
+            request.prompt.data = TEXT_PROMPT
+            rospy.loginfo("Request for perception = {request}")
+            response = self.get_object_locations_service(request)
             return response
         except rospy.ServiceException as e:
             print(f"Service call failed: {e}")
@@ -108,7 +99,7 @@ class CentralClient:
             dict_obj_list.append(dict_obj)
 
         json_detections = json.dumps(dict_obj_list, indent=2)
-        preamble = "You are a robot controller, you need to write a sequence of actions. In the image, there are different geometric shapes. You can only execute two types of actions: \"pick_using_left_arm\", \"pick_using_right_arm\", chose the appropriate action for the object depending on the prompt. The output needs to be in the following formats : {\"pick_using_left_arm\":[<object_id1>,<object_id2>, ...],\"pick_using_right_arm\":[<object_id3>, <object_id4>, ... ]}, this output means that the objects_id 1,2,3,4 .... need to be picked up, object id 1,2 .... need to be picked up using left arm and object id 3, 4 .... need to be picked up using right arm. Make sure the output format is adhered, do not include any more description of the reasoning. Refer the image to see which objects are where"
+        preamble = "You are a robot controller, you need to write a sequence of actions. In the image, there are different geometric shapes. You can only execute two types of actions: \"pick_using_left_arm\", \"pick_using_right_arm\", chose the appropriate action for the object depending on the prompt. The output needs to be in the following formats : {\"pick_using_left_arm\":[<object_id1>,<object_id2>, ...],\"pick_using_right_arm\":[<object_id3>, <object_id4>, ... ]}, this output means that the objects_id 1,2,3,4 .... need to be picked up, object id 1,2 .... need to be picked up using left arm and object id 3, 4 .... need to be picked up using right arm, if its ambigous, pick using the left arm. Make sure the output format is adhered, do not include any more description of the reasoning. Refer the image to see which objects are where"
         client = OpenAI()
 
         completion = client.chat.completions.create(
@@ -155,7 +146,7 @@ class CentralClient:
         move_preaction_goal = MovePreactionActionGoal()
         self.right_move_rest_client.send_goal(move_preaction_goal)
         self.right_move_rest_client.wait_for_result()
-        move_preaction_result = self.right_move_rest_client.get_result()
+        move_preaction_result = self.right_move_look_client.get_result()
         self.left_move_rest_client.send_goal(move_preaction_goal)
         self.left_move_rest_client.wait_for_result()
         move_preaction_result = self.left_move_rest_client.get_result()
@@ -165,10 +156,14 @@ class CentralClient:
         for action in action_list:
             source = action["source_object_position"]
             destination = action["target_object_position"]
+            prompt = String()
+            prompt.data = action["label"]
             rospy.loginfo("Sending pick and place goal")
             pick_place_goal = PickPlaceGoal()
             pick_place_goal.source = source
             pick_place_goal.destination = destination
+            pick_place_goal.prompt = prompt
+            rospy.loginfo(f"Calling pick place with prompt : %s" %pick_place_goal.prompt)
             self.right_pick_place_client.send_goal(pick_place_goal)
             self.right_pick_place_client.wait_for_result()
             pick_place_result = self.right_pick_place_client.get_result()
@@ -199,10 +194,15 @@ class CentralClient:
         for action in action_list:
             source = action["source_object_position"]
             destination = action["target_object_position"]
+            prompt = action["label"]
+            prompt = String()
+            prompt.data = action["label"]
             rospy.loginfo("Sending pick and place goal")
             pick_place_goal = PickPlaceGoal()
             pick_place_goal.source = source
             pick_place_goal.destination = destination
+            pick_place_goal.prompt = prompt
+            rospy.loginfo(f"Calling pick place with prompt : %s" %pick_place_goal.prompt)
             self.left_pick_place_client.send_goal(pick_place_goal)
             self.left_pick_place_client.wait_for_result()
             pick_place_result = self.left_pick_place_client.get_result()
@@ -222,18 +222,18 @@ if __name__ == "__main__":
     central_client = CentralClient()
     rospy.sleep(0.1)
     
-    # prompt = "pick the blue circle using the left arm"
+    # prompt = input("Enter the prompt : ")
+    prompt = "pick red triangle using left arm"
 
     set_io_client = rospy.ServiceProxy("/left/ur_hardware_interface/set_io", SetIO)
     set_io_client(1, 13, 1)
     rospy.sleep(0.5)
     time = rospy.Time.now()
-    i = 0
-    while True:    
-        i+=1
-        prompt = input("Enter the prompt : ")
-        # input(f"Enter to start iteration {i}")
+    i=0
+    while not rospy.is_shutdown():
         # move to the preaction position
+        i+=1
+        input(f"Press enter to start it. {i}")
         move_preaction_goal = MovePreactionActionGoal()
         central_client.right_move_rest_client.send_goal(move_preaction_goal)
         central_client.right_move_rest_client.wait_for_result()
@@ -250,9 +250,12 @@ if __name__ == "__main__":
         # printing the object id and corresponding classes
         for object_thing in response.result.object_position:
             print("Object ID and class : ", object_thing.id, " ", object_thing.Class)
+        if len(response.result.object_position) == 0:
+            rospy.loginfo("No objects detected")
+            sys.exit()
         # save response.result.object_position.image
         annotated_image = cv_bridge.CvBridge().imgmsg_to_cv2(response.result.image, desired_encoding="bgr8")
-        cv2.imwrite("/home/barracuda/catkin_ws/src/create_2025_demo/central_scripts/scripts/object_image.png", annotated_image)
+        cv2.imwrite("/home/brrcuda/catkin_ws/src/create_2025_demo/central_scripts/scripts/object_image.png", annotated_image)
         print("Objects detected in time : ", rospy.Time.to_sec(rospy.Time.now()-time))
         time2 = rospy.Time.now()
         plan_actions = central_client.llm(prompt,response.result.object_position,annotated_image)
@@ -261,78 +264,37 @@ if __name__ == "__main__":
         # create the action list
         action_list_left = []
         action_list_right = []
-        # action list 3D
+        # action list left
         for object_id in object_list_left:
             source_object_id = object_id
-            source_object_position = response.result.object_position[object_id].pose
-            # middle
-            # source_object_position.pose.position.z -= 0.005
-            # source_object_position.pose.position.x -= 0.005
-            # source_object_position.pose.position.y += 0.01
-            # top right
-            # source_object_position.pose.position.z += -0.05
-            # source_object_position.pose.position.x += 0.005
-            # source_object_position.pose.position.y += 0.03
-
-            # top left
-            # source_object_position.pose.position.z += -0.03
-            # source_object_position.pose.position.x += -0.01
-            # source_object_position.pose.position.y += 0.03
-            # # bottom left
-            # source_object_position.pose.position.z += -0.02
-            # source_object_position.pose.position.x += -0.05
-            # source_object_position.pose.position.y += 0.055
-            # bottom right
-            source_object_position.pose.position.z += 0.0
-            source_object_position.pose.position.x += 0.0
-            source_object_position.pose.position.y += 0.0
-            # if response.result.object_position[object_id].Class == "green _ rectangle":
-            #     source_object_position.pose.position.z = green_rectangle_left_z
-            #     source_object_position.pose.position.x += 0
-            #     source_object_position.pose.position.y -= 0
-            # if response.result.object_position[object_id].Class == "red _ triangle":
-            #     source_object_position.pose.position.z = red_triangle_left_z
-            #     source_object_position.pose.position.x += 0
-            #     source_object_position.pose.position.y -= 0
-            # if response.result.object_position[object_id].Class == "blue _ circle":
-            #     source_object_position.pose.position.z = blue_circle_left_z
-            #     source_object_position.pose.position.x += 0
-            #     source_object_position.pose.position.y -= 0
-            source_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
+            source_object_position = response.result.object_position[object_id].pose 
+            label = response.result.object_position[object_id].Class
             destination_object_position = DROP_POSE
+            source_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
             destination_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
             action_parsed = {
                 "source_object_position": source_object_position,
-                "target_object_position": destination_object_position
+                "target_object_position": destination_object_position,
+                "label": label
             }
             action_list_left.append(action_parsed)
-        # action list in water
+        # action list right
         for object_id in object_list_right:
             source_object_id = object_id
             source_object_position = response.result.object_position[object_id].pose
-            # if response.result.object_position[object_id].Class == "green _ rectangle":
-            #     source_object_position.pose.position.z = green_rectangle_right_z
-            #     source_object_position.pose.position.x += 0
-            #     source_object_position.pose.position.y -= 0
-            # if response.result.object_position[object_id].Class == "red _ triangle":
-            #     source_object_position.pose.position.z = red_triangle_right_z
-            #     source_object_position.pose.position.x += 0
-            #     source_object_position.pose.position.y -= 0
-            # if response.result.object_position[object_id].Class == "blue _ circle":
-            #     source_object_position.pose.position.z = blue_circle_right_z
-            #     source_object_position.pose.position.x += 0
-            #     source_object_position.pose.position.y -= 0
+            label = response.result.object_position[object_id].Class
             destination_object_position = DROP_POSE
             source_object_position.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
-            destination_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
-            # source_object_position.pose.position.z += 0.002
+            destination_object_position.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
             action_parsed = {
                 "source_object_position": source_object_position,
-                "target_object_position": destination_object_position
+                "target_object_position": destination_object_position,
+                "label": label
             }
             action_list_right.append(action_parsed)
 
         # input("Press Enter to continue ...")
         central_client.execute_actions_right(action_list_right)
         central_client.execute_actions_left(action_list_left)
+        # confusing extra comment
         rospy.loginfo(f"Total execution time is {rospy.Time.now()-time}")
