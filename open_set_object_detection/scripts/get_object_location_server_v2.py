@@ -207,7 +207,7 @@ class Deprojection:
         boxes, logits, phrases = predict(
             model=self.model,
             image=image,
-            caption=TEXT_PROMPT,
+            caption=request.prompt.data,
             box_threshold=BOX_THRESHOLD,
             text_threshold=TEXT_THRESHOLD
         )

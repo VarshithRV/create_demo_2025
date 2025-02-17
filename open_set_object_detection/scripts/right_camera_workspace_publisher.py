@@ -140,6 +140,6 @@ class DepthOverlayNode:
         rospy.spin()
 
 if __name__ == "__main__":
-    left_node = DepthOverlayNode("right", "rs_415_right")
-    rospy.loginfo(f"[{left_node.depth_topic}] Depth Overlay Node is running with threshold: {left_node.depth_threshold} mm")
+    right_node = DepthOverlayNode("right", "rs_415_right")
+    rospy.loginfo(f"[{right_node.depth_topic}] Depth Overlay Node is running with threshold: {right_node.depth_threshold} mm")
     rospy.spin()
