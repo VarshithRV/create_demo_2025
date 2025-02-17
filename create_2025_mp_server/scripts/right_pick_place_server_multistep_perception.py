@@ -84,6 +84,9 @@ class Motion_planner:
                 waypoints,  # waypoints to follow
                 0.005,  # eef_step
             )
+            # rospy.loginfo("Manually retiming the trajectory with velocity_scaling = 1, acceleration_scaling_factor = 0.5")
+            plan=self.move_group.retime_trajectory(self.move_group.get_current_state(),plan,velocity_scaling_factor = 1.0,algorithm="time_optimal_trajectory_generation")
+
         except Exception as e:
             print(e)
             return False
@@ -107,8 +110,9 @@ class Motion_planner:
         rospy.loginfo("Received pick and place goal")
         start = goal.source
         end = goal.destination
+        prompt = goal.prompt
         
-        success = self.pick_and_place(start, end)
+        success = self.pick_and_place(start, end, prompt)
         
         # set goal to success
         result = PickPlaceActionResult()
@@ -120,7 +124,7 @@ class Motion_planner:
             self.pick_place_server.set_aborted(result)
 
 
-    def pick_and_place(self,start:PoseStamped, end:PoseStamped):
+    def pick_and_place(self,start:PoseStamped, end:PoseStamped, prompt:String):
         rospy.loginfo("Started pick and place with start : %s and end : %s", start, end)
 
         pick_place_height = PICK_PLACE_HEIGHT
@@ -132,7 +136,7 @@ class Motion_planner:
         prepick = Pose()
         prepick = copy.deepcopy(start.pose)
         prepick.position.z = pick_place_height
-        prepick.position.y += 0.05 # for the camera to stare at the object
+        prepick.position.y += 0.1 # for the camera to stare at the object
         waypoints.append(copy.deepcopy(initial_pose))
         waypoints.append(copy.deepcopy(prepick))
         
@@ -152,7 +156,7 @@ class Motion_planner:
 
         # call the perception here
         response = GetObjectLocationsResponse()
-        response = self.right_get_object_locations_service()
+        response = self.right_get_object_locations_service(prompt)
         if response is not None :
             pass
         else :
@@ -169,6 +173,8 @@ class Motion_planner:
         waypoints  = []
         initial_pose = self.move_group.get_current_pose().pose
         pick = copy.deepcopy(object_pose)
+        pick.position.x += 0.0
+        pick.position.y += 0.0
         pick.orientation = start.pose.orientation
         correction = copy.deepcopy(pick)
         correction.position.z = initial_pose.position.z
@@ -193,7 +199,7 @@ class Motion_planner:
         waypoints = []
         current_pose = self.move_group.get_current_pose().pose
         waypoints.append(copy.deepcopy(current_pose))
-        waypoints.append(copy.deepcopy(prepick))
+        waypoints.append(copy.deepcopy(correction))
         self.execute_waypoints(waypoints)
         rospy.sleep(0.2)
         
