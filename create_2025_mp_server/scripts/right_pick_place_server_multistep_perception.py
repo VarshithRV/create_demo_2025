@@ -136,7 +136,7 @@ class Motion_planner:
         prepick = Pose()
         prepick = copy.deepcopy(start.pose)
         prepick.position.z = pick_place_height
-        prepick.position.y += 0.1 # for the camera to stare at the object
+        prepick.position.y += 0.155 # for the camera to stare at the object
         waypoints.append(copy.deepcopy(initial_pose))
         waypoints.append(copy.deepcopy(prepick))
         
@@ -173,9 +173,9 @@ class Motion_planner:
         waypoints  = []
         initial_pose = self.move_group.get_current_pose().pose
         pick = copy.deepcopy(object_pose)
-        pick.position.x += 0.0
-        pick.position.y += 0.0
-        pick.position.z += 0.01
+        pick.position.x += -0.01
+        pick.position.y += 0.015
+        pick.position.z += 0.02
         pick.orientation = start.pose.orientation
         correction = copy.deepcopy(pick)
         correction.position.z = initial_pose.position.z
