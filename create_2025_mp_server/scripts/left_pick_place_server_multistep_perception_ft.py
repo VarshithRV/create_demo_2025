@@ -236,6 +236,12 @@ class Motion_planner:
         prepick.position.z = pick_place_height
         prepick.position.y += 0.1 # for the camera to stare at the object
         waypoints.append(copy.deepcopy(initial_pose))
+        if prepick.position.x>0 and prepick.position.y>0:
+            origin = Pose()
+            origin.position.y = 0.20
+            origin.position.z = pick_place_height
+            origin.orientation = prepick.orientation
+            waypoints.append(copy.deepcopy(origin))
         waypoints.append(copy.deepcopy(prepick))
         
         self.execute_waypoints(waypoints)
@@ -308,6 +314,13 @@ class Motion_planner:
         preplace = Pose()
         preplace = copy.deepcopy(end.pose)
         preplace.position.z = pick_place_height
+        # detect if the object is in first quadrant, if so then go to origin and then place it
+        if pick.position.x>0 and pick.position.y > 0:
+            origin = Pose()
+            origin.position.y = 0.2
+            origin.position.z = pick_place_height
+            origin.orientation = preplace.orientation
+            waypoints.append(copy.deepcopy(origin))
         waypoints.append(copy.deepcopy(preplace))
         self.execute_waypoints(waypoints)
         rospy.sleep(0.2)
