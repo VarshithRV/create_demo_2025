@@ -799,7 +799,7 @@
     <joint name="world_to_left" type="fixed">
         <parent link="world" />
         <child link="left_base_link" />
-        <origin rpy="-0.008 0.002 2.237" xyz="-0.498 0.530 0.005" />
+        <origin rpy="-0.003 -0.017 1.583" xyz="-0.363 0.521 0.008" />
     </joint>
     <joint name="world_to_right" type="fixed">
         <parent link="world" />
