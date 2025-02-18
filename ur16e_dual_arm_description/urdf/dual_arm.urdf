@@ -804,7 +804,7 @@
     <joint name="world_to_right" type="fixed">
         <parent link="world" />
         <child link="right_base_link" />
-        <origin rpy="-0.002 -0.001 2.268" xyz="0.647 0.539 0.007" />
+        <origin rpy="0.004 -0.033 -1.590" xyz="0.576 0.525 0.007" />
     </joint>
     <gazebo>
         <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
