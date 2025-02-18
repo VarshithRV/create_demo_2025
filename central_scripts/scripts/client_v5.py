@@ -19,9 +19,9 @@ import sys
 
 #### Define drope pose #########
 DROP_POSE = PoseStamped()
-DROP_POSE.pose.position.x= 0.08086503905922947
-DROP_POSE.pose.position.y= 0.34706300699744835
-DROP_POSE.pose.position.z= 0.16728816417432144
+DROP_POSE.pose.position.x= 0.1
+DROP_POSE.pose.position.y= 0.35
+DROP_POSE.pose.position.z= 0.05
 DROP_POSE.pose.orientation.x= -0.7084016817823435
 DROP_POSE.pose.orientation.y= 0.7057186070566935
 DROP_POSE.pose.orientation.z= 0.007889737191896513

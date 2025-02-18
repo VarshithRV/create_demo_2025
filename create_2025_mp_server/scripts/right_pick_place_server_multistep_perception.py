@@ -175,6 +175,7 @@ class Motion_planner:
         pick = copy.deepcopy(object_pose)
         pick.position.x += 0.0
         pick.position.y += 0.0
+        pick.position.z += 0.01
         pick.orientation = start.pose.orientation
         correction = copy.deepcopy(pick)
         correction.position.z = initial_pose.position.z
