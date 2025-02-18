@@ -755,13 +755,10 @@
             </material>
         </collision>
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0" />
+            <origin xyz="-0.06 -0.045 0.0" rpy="0 0 0" />
             <geometry>
-                <cylinder radius="0.05" length="0.22" />
+                <mesh scale="0.001 0.001 0.001" filename="package://ur16e_dual_arm_description/urdf/meshes/rws.STL" />
             </geometry>
-            <material name="Red">
-                <color rgba="1 0 0 1" />
-            </material>
         </visual>
         <inertial>
             <mass value="0.1" />
@@ -773,13 +770,13 @@
     <joint name="right_wrist_3_link-_suction_gripper" type="fixed">
         <parent link="right_wrist_3_link" />
         <child link="right_suction_gripper" />
-        <origin rpy="0 0 0" xyz="0 0 0.11" />
+        <origin rpy="0 0 0" xyz="0 0 0" />
     </joint>
     <link name="right_suction_gripper_poi" />
     <joint name="right_suction_gripper-poi" type="fixed">
         <parent link="right_suction_gripper" />
         <child link="right_suction_gripper_poi" />
-        <origin rpy="0 0 0" xyz="0 0 0.11" />
+        <origin rpy="0 0 0" xyz="-0.005 -0.004 0.109" />
     </joint>
     <!-- ROS-Industrial 'flange' frame: attachment point for EEF models -->
     <link name="right_flange" />
@@ -802,12 +799,12 @@
     <joint name="world_to_left" type="fixed">
         <parent link="world" />
         <child link="left_base_link" />
-        <origin rpy="-0.003 -0.017 1.583" xyz="-0.363 0.521 0.008" />
+        <origin rpy="-0.008 0.002 2.237" xyz="-0.498 0.530 0.005" />
     </joint>
     <joint name="world_to_right" type="fixed">
         <parent link="world" />
         <child link="right_base_link" />
-        <origin rpy="0.004 -0.033 -1.590" xyz="0.576 0.525 0.007" />
+        <origin rpy="-0.002 -0.001 2.268" xyz="0.647 0.539 0.007" />
     </joint>
     <gazebo>
         <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
