@@ -18,7 +18,7 @@ from ur_msgs.srv import SetIO
 ### variable bound for change
 # move up or down, set gripper value, time before activating gripper and moving
 PICK_PLACE_HEIGHT = 0.3
-LOOK_HEIGHT = 0.23
+LOOK_HEIGHT = 0.26
 
 class Motion_planner:
 
@@ -163,7 +163,8 @@ class Motion_planner:
             rospy.logerr("Second Perception failed, motion plan failed")
             return None
         
-        if len(response.result.object_position) > 1 or len(response.result.object_position) ==0:
+        # if len(response.result.object_position) > 1 or len(response.result.object_position) ==0:
+        if len(response.result.object_position) ==0:
             rospy.logwarn("Multiple or no objects detected while taking a closer look, might lead to wrong object being picked")
         object_pose = response.result.object_position[0].pose.pose
         rospy.loginfo("Detected object : %s" %response.result.object_position[0].pose.pose)
@@ -175,7 +176,7 @@ class Motion_planner:
         pick = copy.deepcopy(object_pose)
         pick.position.x += -0.01
         pick.position.y += 0.015
-        pick.position.z += 0.02
+        pick.position.z += -0.025
         pick.orientation = start.pose.orientation
         correction = copy.deepcopy(pick)
         correction.position.z = initial_pose.position.z
