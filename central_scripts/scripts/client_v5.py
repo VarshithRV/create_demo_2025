@@ -41,7 +41,7 @@ LEFT_ORIENTATION_POSE.pose.orientation.y= -0.7184260972597232
 LEFT_ORIENTATION_POSE.pose.orientation.z= -0.006965116877090745
 LEFT_ORIENTATION_POSE.pose.orientation.w= 0.004041165520492587
 
-TEXT_PROMPT = "blue_circle.red_hex.green_rectangle.green_circle.blue_rectangle"
+TEXT_PROMPT = "blue_circle.red_hex.green_rectangle.green_circle.blue_rectangle.cyan_ball.yellow_ball"
 
 class CentralClient:
     def __init__(self) -> None:
@@ -99,7 +99,11 @@ class CentralClient:
             dict_obj_list.append(dict_obj)
 
         json_detections = json.dumps(dict_obj_list, indent=2)
-        preamble = "You are a robot controller, you need to write a sequence of actions. In the image, there are different geometric shapes. You can only execute two types of actions: \"pick_using_left_arm\", \"pick_using_right_arm\", chose the appropriate action for the object depending on the prompt. The output needs to be in the following formats : {\"pick_using_left_arm\":[<object_id1>,<object_id2>, ...],\"pick_using_right_arm\":[<object_id3>, <object_id4>, ... ]}, this output means that the objects_id 1,2,3,4 .... need to be picked up, object id 1,2 .... need to be picked up using left arm and object id 3, 4 .... need to be picked up using right arm, if its ambigous, pick using the left arm. Make sure the output format is adhered, do not include any more description of the reasoning. Refer the image to see which objects are where"
+        preamble = "You are a robot controller, you need to write a sequence of actions. In the image, there are different geometric shapes. You can only execute two types of actions: \"pick_using_left_arm\", \"pick_using_right_arm\", chose the appropriate action for the object depending on the prompt. The output needs to be in the following formats : {\"pick_using_left_arm\":[<object_id1>,<object_id2>, ...],\"pick_using_right_arm\":[<object_id3>, <object_id4>, ... ]}, this output means that the objects_id 1,2,3,4 .... need to be picked up, object id 1,2 .... need to be picked up using left arm and object id 3, 4 .... need to be picked up using right arm. Make sure the output format is adhered, do not include any more description of the reasoning. Refer the image to see which objects are where"
+        preamble2 = "The two arms have different capabilities, the right arm has a fingered gripper and the left arm has the suction gripper"
+        preamble3 = "The suction gripper is capable of picking up planar and 2d objects(shapes), example rectangle, circle, hexagon"
+        preamble4 = "The fingered gripper is capable of picking up 3 dimensional discrete objects, like apples, fruits etc "
+        preamble5 = "Use this information to reason which arm to use for the object"
         client = OpenAI()
 
         completion = client.chat.completions.create(
@@ -109,6 +113,26 @@ class CentralClient:
                     "type" : "text",
                     "role": "system", 
                     "content": preamble
+                },
+                {
+                    "type" : "text",
+                    "role": "system", 
+                    "content": preamble2
+                },
+                {
+                    "type" : "text",
+                    "role": "system", 
+                    "content": preamble3
+                },
+                {
+                    "type" : "text",
+                    "role": "system", 
+                    "content": preamble4
+                },
+                {
+                    "type" : "text",
+                    "role": "system", 
+                    "content": preamble5
                 },
                 {
                     "type" : "text",
