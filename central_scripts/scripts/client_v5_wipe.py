@@ -9,8 +9,8 @@ import json
 import requests
 from geometry_msgs.msg import PointStamped, Pose, PoseStamped
 from std_msgs.msg import String
-from create_2025_mp_server_msgs.msg import PickPlaceAction, PickPlaceGoal, PickPlaceResult
-from create_2025_mp_server_msgs.msg import MovePreactionAction, MovePreactionActionGoal, MovePreactionActionResult
+from create_2025_mp_server_msgs.msg import PickPlaceAction, PickPlaceGoal, PickPlaceResult, SwipeAction, SwipeGoal, SwipeResult
+from create_2025_mp_server_msgs.msg import MovePreactionAction, MovePreactionActionGoal, MovePreactionActionResult, PoseAction, PoseGoal, PoseResult
 import actionlib
 from openai import OpenAI
 import numpy as np
@@ -59,6 +59,9 @@ class CentralClient:
         self.left_move_preaction_client = actionlib.SimpleActionClient("left_move_preaction", MovePreactionAction)
         self.left_move_look_client = actionlib.SimpleActionClient("left_move_look", MovePreactionAction)
         self.left_move_rest_client = actionlib.SimpleActionClient("left_move_rest", MovePreactionAction)
+        self.right_place_client = actionlib.SimpleActionClient("right_place", PoseAction)
+        self.right_pick_client = actionlib.SimpleActionClient("right_pick", PoseAction)
+        self.right_swipe_client = actionlib.SimpleActionClient("right_swipe", SwipeAction)
         rospy.sleep(0.1)
         self.right_pick_place_client.wait_for_server()
         self.right_move_preaction_client.wait_for_server()
@@ -68,6 +71,9 @@ class CentralClient:
         self.right_move_rest_client.wait_for_server()
         self.left_move_look_client.wait_for_server()
         self.left_move_rest_client.wait_for_server()
+        self.right_place_client.wait_for_server()
+        self.right_pick_client.wait_for_server()
+        self.right_swipe_client.wait_for_server()
         rospy.loginfo("All servers are connected")
 
     def get_object_locations(self):
@@ -99,7 +105,7 @@ class CentralClient:
             dict_obj_list.append(dict_obj)
 
         json_detections = json.dumps(dict_obj_list, indent=2)
-        preamble = "You are a robot controller, you need to write a sequence of actions. In the image, there are different geometric shapes. You can only execute two types of actions: \"pick_using_left_arm\", \"pick_using_right_arm\", chose the appropriate action for the object depending on the prompt. The output needs to be in the following formats : {\"pick_using_left_arm\":[<object_id1>,<object_id2>, ...],\"pick_using_right_arm\":[<object_id3>, <object_id4>, ... ]}, this output means that the objects_id 1,2,3,4 .... need to be picked up, object id 1,2 .... need to be picked up using left arm and object id 3, 4 .... need to be picked up using right arm, if its ambigous, pick using the left arm. Make sure the output format is adhered, do not include any more description of the reasoning. Refer the image to see which objects are where"
+        preamble = "You are a robot controller, you need to write a sequence of actions. In the image, there is a red_ball, the red ball is attached to a brush that can be used to clean, there are also a few dirt patches, you job is to choose the right dirt patch to clean, to clean the patch with object_id_1 and object_id_2, you need to output the following : \{'clean':[object_id_1,object_id_2]\}, make sure the output format is adhered, do not include anything other than the output."
         client = OpenAI()
 
         completion = client.chat.completions.create(
@@ -130,10 +136,10 @@ class CentralClient:
 
         # Return the generated response
         pick_list = json.loads(completion.choices[0].message.content)
-        for object in pick_list["pick_using_left_arm"]:
+        for object in pick_list["clean"]:
             object = int(object)
-        for object in pick_list["pick_using_right_arm"]:
-            object = int(object)
+        # for object in pick_list["pick_using_right_arm"]:
+        #     object = int(object)
 
         rospy.loginfo(f"The llm returned with object list : {pick_list}")
 
@@ -226,72 +232,95 @@ if __name__ == "__main__":
     # prompt = "pick the green rectangle using the left arm"
 
     set_io_client = rospy.ServiceProxy("/left/ur_hardware_interface/set_io", SetIO)
-    set_io_client(1, 13, 1)
-    rospy.sleep(0.5)
+    rospy.sleep(0.05)
     time = rospy.Time.now()
         
     # move to the preaction position
     move_preaction_goal = MovePreactionActionGoal()
+    input("Enter to right move to rest")
     central_client.right_move_rest_client.send_goal(move_preaction_goal)
     central_client.right_move_rest_client.wait_for_result()
     move_preaction_result = central_client.right_move_rest_client.get_result()
+    input("Enter to left move to look")
     central_client.left_move_look_client.send_goal(move_preaction_goal)
     central_client.left_move_look_client.wait_for_result()
     move_preaction_result = central_client.left_move_look_client.get_result()
     rospy.sleep(0.2)
+    # input("Enter to call perception")
     rospy.loginfo("Calling the perception now")
     response = central_client.get_object_locations()
     rospy.loginfo(f"Perception finished in time : {rospy.Time.now() - time}")
     time1 = rospy.Time.now()
     set_io_client(1, 12, 0)
+    
     # printing the object id and corresponding classes
     for object_thing in response.result.object_position:
         print("Object ID and class : ", object_thing.id, " ", object_thing.Class)
+        print("Object bounding poses : ", object_thing.x_min_y_min, object_thing.x_max_y_max)
     if len(response.result.object_position) == 0:
         rospy.loginfo("No objects detected")
         sys.exit()
+    
+    input("Enter both move to rest simultaneously")
+    central_client.left_move_rest_client.send_goal(move_preaction_goal)
+    central_client.left_move_rest_client.wait_for_result()
+    central_client.right_move_rest_client.send_goal(move_preaction_goal)
+    central_client.right_move_rest_client.wait_for_result()
+    
     # save response.result.object_position.image
     annotated_image = cv_bridge.CvBridge().imgmsg_to_cv2(response.result.image, desired_encoding="bgr8")
     cv2.imwrite("/home/barracuda/catkin_ws/src/create_2025_demo/central_scripts/scripts/object_image.png", annotated_image)
     print("Objects detected in time : ", rospy.Time.to_sec(rospy.Time.now()-time))
     time2 = rospy.Time.now()
     plan_actions = central_client.llm(prompt,response.result.object_position,annotated_image)
-    object_list_left = plan_actions["pick_using_left_arm"]
-    object_list_right = plan_actions["pick_using_right_arm"]
-    # create the action list
-    action_list_left = []
-    action_list_right = []
-    # action list left
-    for object_id in object_list_left:
-        source_object_id = object_id
-        source_object_position = response.result.object_position[object_id].pose
-        label = response.result.object_position[object_id].Class
-        destination_object_position = DROP_POSE
-        source_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
-        destination_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
-        action_parsed = {
-            "source_object_position": source_object_position,
-            "target_object_position": destination_object_position,
-            "label": label
-        }
-        action_list_left.append(action_parsed)
-    # action list right
-    for object_id in object_list_right:
-        source_object_id = object_id
-        source_object_position = response.result.object_position[object_id].pose
-        label = response.result.object_position[object_id].Class
-        destination_object_position = DROP_POSE
-        source_object_position.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
-        destination_object_position.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
-        action_parsed = {
-            "source_object_position": source_object_position,
-            "target_object_position": destination_object_position,
-            "label": label
-        }
-        action_list_right.append(action_parsed)
-    
-    input("Press Enter to continue ...")
-    central_client.execute_actions_right(action_list_right)
-    central_client.execute_actions_left(action_list_left)
-    # confusing extra comment
+    object_list_clean = plan_actions["clean"]
+
+
+    # pick the red ball using the pick client
+    for obj in response.result.object_position:
+        if obj.Class == "red _ ball":
+            print("red ball detected")
+            pick_goal = PoseGoal()
+            pick_goal.pose = obj.pose
+            pick_goal.pose.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
+            pick_goal.prompt.data = obj.Class
+            print("Pose : ",obj.pose, " class : ",obj.Class)
+            input("Pick red ball using right")
+            central_client.right_pick_client.send_goal(pick_goal)
+            central_client.right_pick_client.wait_for_result()
+            pick_result = central_client.right_pick_client.get_result()
+            rospy.loginfo(f"Pick result: {pick_result.result}")
+
+    input("Swipe start")
+    # for all int in clean_list, clean using the swipe server
+    for obj_id in object_list_clean:
+        for obj in response.result.object_position:
+            if obj.id == obj_id:
+                swipe_goal = SwipeGoal()
+                swipe_goal.stain_pose = obj.pose
+                swipe_goal.stain_pose.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
+                swipe_goal.x_min_y_min = obj.x_min_y_min
+                swipe_goal.x_max_y_max = obj.x_max_y_max
+                central_client.right_swipe_client.send_goal(swipe_goal)
+                central_client.right_swipe_client.wait_for_result()
+                swipe_result = central_client.right_swipe_client.get_result()
+                rospy.loginfo(f"Swipe result: {swipe_result.result}")
+
+    input("Place red ball back to start")
+    for obj in response.result.object_position:
+        if obj.Class == "red _ ball":
+            place_goal = PoseGoal()
+            place_goal.pose = obj.pose
+            place_goal.pose.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
+            central_client.right_place_client.send_goal(place_goal)
+            central_client.right_place_client.wait_for_result()
+            place_result = central_client.right_place_client.get_result()
+            rospy.loginfo(f"Pick result: {pick_result.result}")
     rospy.loginfo(f"Total execution time is {rospy.Time.now()-time}")
+
+    # Move the right arm back to resting position
+    rospy.loginfo("Moving right arm back to resting position")
+    central_client.right_move_rest_client.send_goal(move_preaction_goal)
+    central_client.right_move_rest_client.wait_for_result()
+    move_preaction_result = central_client.right_move_rest_client.get_result()
+    rospy.loginfo(f"Move preaction result: {move_preaction_result.result}")

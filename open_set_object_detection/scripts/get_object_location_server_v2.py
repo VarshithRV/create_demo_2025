@@ -181,12 +181,18 @@ class Deprojection:
             y_center = int((xyxy[i][1] + xyxy[i][3]) / 2) + y_min
             pose = self.get_3d_position(x_center, y_center, depth_image=self.left_depth_image, camera_info=self.left_camera_info, camera_model=self.left_camera_model, depth_threshold=self.left_depth_threshold)
             if pose is None:
-                continue
+                pass
             object_position.pose = pose
             object_position.x_min = xyxy[i][0] + x_min
             object_position.y_min = xyxy[i][1] + y_min
             object_position.x_max = xyxy[i][2] + x_min
             object_position.y_max = xyxy[i][3] + y_min
+            object_position.x_min_y_min = self.get_3d_position(object_position.x_max, object_position.y_min, depth_image=self.left_depth_image, camera_info=self.left_camera_info, camera_model=self.left_camera_model, depth_threshold=self.left_depth_threshold)
+            if object_position.x_min_y_min is None:
+                pass
+            object_position.x_max_y_max = self.get_3d_position(object_position.x_min, object_position.y_max, depth_image=self.left_depth_image, camera_info=self.left_camera_info, camera_model=self.left_camera_model, depth_threshold=self.left_depth_threshold)
+            if object_position.x_max_y_max is None:
+                pass
             result.object_position.append(object_position)
 
         result.image = self.cv_bridge.cv2_to_imgmsg(annotated_frame, encoding="bgr8")
@@ -233,6 +239,12 @@ class Deprojection:
             object_position.y_min = xyxy[i][1] + y_min
             object_position.x_max = xyxy[i][2] + x_min
             object_position.y_max = xyxy[i][3] + y_min
+            object_position.x_min_y_min = self.get_3d_position(object_position.x_max, object_position.y_min, depth_image=self.right_depth_image, camera_info=self.right_camera_info, camera_model=self.right_camera_model, depth_threshold=self.right_depth_threshold)
+            if object_position.x_min_y_min is None:
+                pass
+            object_position.x_max_y_max = self.get_3d_position(object_position.x_min, object_position.y_max, depth_image=self.right_depth_image, camera_info=self.right_camera_info, camera_model=self.right_camera_model, depth_threshold=self.right_depth_threshold)
+            if object_position.x_max_y_max is None:
+                pass
             result.object_position.append(object_position)
 
         result.image = self.cv_bridge.cv2_to_imgmsg(annotated_frame, encoding="bgr8")

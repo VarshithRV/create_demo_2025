@@ -1,0 +1,7 @@
+geometry_msgs/PoseStamped stain_pose
+geometry_msgs/PoseStamped x_min_y_min
+geometry_msgs/PoseStamped x_max_y_max
+---
+bool result
+---
+

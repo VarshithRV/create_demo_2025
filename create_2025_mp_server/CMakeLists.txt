@@ -170,7 +170,8 @@ catkin_install_python(PROGRAMS
   scripts/right_pick_place_server.py scripts/left_move_look_server.py scripts/left_move_rest_server.py
   scripts/right_move_look_server.py scripts/right_move_rest_server.py scripts/right_pick_place_server_testing.py
   scripts/left_pick_place_server_multistep_perception.py scripts/right_pick_place_server_multistep_perception.py
-  scripts/left_pick_place_server_multistep_perception_ft.py
+  scripts/left_pick_place_server_multistep_perception_ft.py scripts/right_place_server.py scripts/right_swipe_server.py
+  scripts/right_pick_multistep_perception_server.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
