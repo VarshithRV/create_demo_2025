@@ -14,7 +14,7 @@
     </include>
     
     <!-- moveit_rviz -->
-    <include file="$(find ur16e_dual_arm_moveit_config)/launch/moveit_rviz.launch"/>
+    <include file="$(find ur16e_dual_arm_moveit_config)/launch/moveit_rviz.launch" config="/home/brrcuda/Desktop/dual_view.rviz"/>
 
     <!-- topic tools node for /joint_states -->
     <node pkg="topic_tools" type="relay" name="relay_left_joint_states" args="/left/joint_states /joint_states"/>

@@ -41,7 +41,7 @@ LEFT_ORIENTATION_POSE.pose.orientation.y= -0.7184260972597232
 LEFT_ORIENTATION_POSE.pose.orientation.z= -0.006965116877090745
 LEFT_ORIENTATION_POSE.pose.orientation.w= 0.004041165520492587
 
-TEXT_PROMPT = "blue_circle.red_triangle.green_square"
+TEXT_PROMPT = "blue_circle.red_hex.green_rectangle.green_circle.blue_rectangle"
 
 class CentralClient:
     def __init__(self) -> None:
