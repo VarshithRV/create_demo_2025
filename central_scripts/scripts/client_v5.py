@@ -11,6 +11,7 @@ from geometry_msgs.msg import PointStamped, Pose, PoseStamped
 from std_msgs.msg import String
 from create_2025_mp_server_msgs.msg import PickPlaceAction, PickPlaceGoal, PickPlaceResult
 from create_2025_mp_server_msgs.msg import MovePreactionAction, MovePreactionActionGoal, MovePreactionActionResult
+from std_srvs.srv import Trigger, TriggerRequest, TriggerResponse
 import actionlib
 from openai import OpenAI
 import numpy as np
@@ -50,6 +51,11 @@ class CentralClient:
             GetObjectLocations
         )
 
+        self.voice_interface_service = rospy.ServiceProxy(
+            "tts",
+            Trigger
+        )
+
         rospy.loginfo("Waiting for servers")
         self.right_pick_place_client = actionlib.SimpleActionClient("right_pick_place", PickPlaceAction)
         self.right_move_preaction_client = actionlib.SimpleActionClient("right_move_preaction", MovePreactionAction)
@@ -80,6 +86,14 @@ class CentralClient:
         except rospy.ServiceException as e:
             print(f"Service call failed: {e}")
   
+    def get_prompt_from_voice(self):
+        try: 
+            request = TriggerRequest()
+            response = self.voice_interface_service(request)
+            return response.message
+        except rospy.ServiceException as e:
+            print(f"Service call failed: {e}")
+    
     def llm(self, prompt, object_detections, annotated_image):
 
         # process image into the prompt as well
@@ -222,7 +236,9 @@ if __name__ == "__main__":
     central_client = CentralClient()
     rospy.sleep(0.1)
     
-    prompt = input("Enter the prompt : ")
+    prompt = central_client.get_prompt_from_voice()
+    rospy.loginfo("Got prompt %s", prompt)
+    # prompt = input("Enter the prompt : ")
     # prompt = "pick the green rectangle using the left arm"
 
     set_io_client = rospy.ServiceProxy("/left/ur_hardware_interface/set_io", SetIO)
