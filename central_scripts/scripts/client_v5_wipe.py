@@ -105,7 +105,11 @@ class CentralClient:
             dict_obj_list.append(dict_obj)
 
         json_detections = json.dumps(dict_obj_list, indent=2)
+<<<<<<< HEAD
         preamble = "You are a robot controller, you need to write a sequence of actions. In the image, there is a red_ball, the red ball is attached to a brush that can be used to clean, there are also a few dirt patches, you job is to choose the right dirt patch to clean, to clean the patch with object_id_1 and object_id_2, you need to output the following : \{'clean':[object_id_1,object_id_2]\}, make sure the output format is adhered, do not include anything other than the output."
+=======
+        preamble = "You are a robot controller, you need to write a sequence of actions. In the image, there are different geometric shapes. You can only execute two types of actions: \"pick_using_left_arm\", \"pick_using_right_arm\", chose the appropriate action for the object depending on the prompt. The output needs to be in the following formats : {\"pick_using_left_arm\":[<object_id1>,<object_id2>, ...],\"pick_using_right_arm\":[<object_id3>, <object_id4>, ... ]}, this output means that the objects_id 1,2,3,4 .... need to be picked up, object id 1,2 .... need to be picked up using left arm and object id 3, 4 .... need to be picked up using right arm, if its ambigous, pick using the left arm, for objects that are 3D and not planar, use the right arm if not specified. Make sure the output format is adhered, do not include any more description of the reasoning. Refer the image to see which objects are where"
+>>>>>>> fbf42d480fd2b7481ec059cbfee39a9c905abc0c
         client = OpenAI()
 
         completion = client.chat.completions.create(
