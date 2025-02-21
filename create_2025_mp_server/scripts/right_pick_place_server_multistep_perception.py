@@ -174,9 +174,9 @@ class Motion_planner:
         waypoints  = []
         initial_pose = self.move_group.get_current_pose().pose
         pick = copy.deepcopy(object_pose)
-        pick.position.x += -0.02
-        pick.position.y += 0.015
-        pick.position.z += -0.025
+        pick.position.x += -0.015
+        pick.position.y += 0.00
+        pick.position.z += -0.02
         pick.orientation = start.pose.orientation
         correction = copy.deepcopy(pick)
         correction.position.z = initial_pose.position.z
@@ -226,7 +226,7 @@ class Motion_planner:
         rospy.loginfo("Deactivating gripper")
         self.set_io_client(1,12,0)
 
-        rospy.sleep(1)
+        rospy.sleep(1.8)
 
         waypoints = []
         current_pose = self.move_group.get_current_pose().pose

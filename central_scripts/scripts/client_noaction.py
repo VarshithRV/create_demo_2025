@@ -11,7 +11,6 @@ from geometry_msgs.msg import PointStamped, Pose, PoseStamped
 from std_msgs.msg import String
 from create_2025_mp_server_msgs.msg import PickPlaceAction, PickPlaceGoal, PickPlaceResult
 from create_2025_mp_server_msgs.msg import MovePreactionAction, MovePreactionActionGoal, MovePreactionActionResult
-from std_srvs.srv import Trigger, TriggerRequest, TriggerResponse
 import actionlib
 from openai import OpenAI
 import numpy as np
@@ -29,29 +28,29 @@ DROP_POSE.pose.orientation.z= 0.007889737191896513
 DROP_POSE.pose.orientation.w= 0.008127542614487311
 
 PLACE_POSE1 = PoseStamped()
+PLACE_POSE1.pose.position.x = 0.14780993448100951
+PLACE_POSE1.pose.position.y = 0.39015564774658973
+PLACE_POSE1.pose.position.z = 0.05
 PLACE_POSE2 = PoseStamped()
-PLACE_POSE3 = PoseStamped()
-PLACE_POSE4 = PoseStamped()
-PLACE_POSE5 = PoseStamped()
-PLACE_POSE6 = PoseStamped()
-PLACE_POSE6.pose.position.x = 0.14780993448100951
-PLACE_POSE6.pose.position.y = 0.39015564774658973
-PLACE_POSE6.pose.position.z = 0.035
 PLACE_POSE2.pose.position.x = 0.14780993448100951
 PLACE_POSE2.pose.position.y = 0.32015564774658973
-PLACE_POSE2.pose.position.z =  0.035
+PLACE_POSE2.pose.position.z =  0.05
+PLACE_POSE3 = PoseStamped()
 PLACE_POSE3.pose.position.x = 0.07026579762831908
 PLACE_POSE3.pose.position.y = 0.39015564774658973
-PLACE_POSE3.pose.position.z = 0.035
+PLACE_POSE3.pose.position.z = 0.05
+PLACE_POSE4 = PoseStamped()
 PLACE_POSE4.pose.position.x = 0.07026579762831908
 PLACE_POSE4.pose.position.y = 0.32015564774658973
-PLACE_POSE4.pose.position.z = 0.035
+PLACE_POSE4.pose.position.z = 0.05
+PLACE_POSE5 = PoseStamped()
 PLACE_POSE5.pose.position.x = -0.02224517915011924
 PLACE_POSE5.pose.position.y = 0.39015564774658973
-PLACE_POSE5.pose.position.z = 0.035
-PLACE_POSE1.pose.position.x = -0.02224517915011924
-PLACE_POSE1.pose.position.y = 0.32015564774658973
-PLACE_POSE1.pose.position.z = 0.035
+PLACE_POSE5.pose.position.z = 0.05
+PLACE_POSE6 = PoseStamped()
+PLACE_POSE6.pose.position.x = -0.02224517915011924
+PLACE_POSE6.pose.position.y = 0.32015564774658973
+PLACE_POSE6.pose.position.z = 0.05
 
 PLACE_POSES = [PLACE_POSE1,PLACE_POSE2,PLACE_POSE3,PLACE_POSE4,PLACE_POSE5,PLACE_POSE6]
 #################################
@@ -76,11 +75,6 @@ class CentralClient:
         self.get_object_locations_service = rospy.ServiceProxy(
             "left_get_object_locations",
             GetObjectLocations
-        )
-
-        self.voice_interface_service = rospy.ServiceProxy(
-            "tts",
-            Trigger
         )
 
         rospy.loginfo("Waiting for servers")
@@ -113,14 +107,6 @@ class CentralClient:
         except rospy.ServiceException as e:
             print(f"Service call failed: {e}")
   
-    def get_prompt_from_voice(self):
-        try: 
-            request = TriggerRequest()
-            response = self.voice_interface_service(request)
-            return response.message
-        except rospy.ServiceException as e:
-            print(f"Service call failed: {e}")
-    
     def llm(self, prompt, object_detections, annotated_image):
 
         # process image into the prompt as well
@@ -293,9 +279,7 @@ if __name__ == "__main__":
     central_client = CentralClient()
     rospy.sleep(0.1)
     
-    prompt = central_client.get_prompt_from_voice()
-    rospy.loginfo("Got prompt %s", prompt)
-    # prompt = input("Enter the prompt : ")
+    prompt = input("Enter the prompt : ")
     # prompt = "pick the green rectangle using the left arm"
 
     set_io_client = rospy.ServiceProxy("/left/ur_hardware_interface/set_io", SetIO)
@@ -366,8 +350,8 @@ if __name__ == "__main__":
         }
         action_list_right.append(action_parsed)
     
-    input("Press Enter to continue ...")
-    central_client.execute_actions_right(action_list_right)
-    central_client.execute_actions_left(action_list_left)
-    # confusing extra comment
+    # input("Press Enter to continue ...")
+    # central_client.execute_actions_right(action_list_right)
+    # central_client.execute_actions_left(action_list_left)
+    # # confusing extra comment
     rospy.loginfo(f"Total execution time is {rospy.Time.now()-time}")

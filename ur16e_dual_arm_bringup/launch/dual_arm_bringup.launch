@@ -13,8 +13,8 @@
         <param name="" value=""/>
     </include>
     
-    <!-- moveit_rviz -->
-    <include file="$(find ur16e_dual_arm_moveit_config)/launch/moveit_rviz.launch" config="/home/brrcuda/Desktop/dual_view.rviz"/>
+    <!-- Launch RViz with a specific configuration -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d /home/rrcuda/Desktop/double_view.rviz"/>
 
     <!-- topic tools node for /joint_states -->
     <node pkg="topic_tools" type="relay" name="relay_left_joint_states" args="/left/joint_states /joint_states"/>
