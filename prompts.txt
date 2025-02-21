@@ -1,11 +1,15 @@
-1. pick <object> :object={circle, rectangle, triangle}
-2. pick the object that looks like a pyramid
-3. pick the object that has the color of a leaf
-# if arm is not specified, it uses the left arm by default
-4. pick the one object using the right arm
-5. pick any two objects using the left arm
-6. pick all the objects use the left arm more than the right
-7. pick the object that doesn't have any vertices
-8. don't pick the object that doesn't have a vertex, pick the rest
-9. pick the object that looks like the eye of the illuminati
-10.pick the closest thing to frisbee
+1. pick <object> :object={circle, rectangle, triangle, ball, cyan ball, yellow ball, pick ball}
+2. pick any 2 objects
+3. pick more objects using the left arm than the right, pick things that are round only
+4. pick something that has 6 edges
+5. pick the object that looks very similar to a stop sign
+6. pick the object that has the color of a leaf
+7. pick a 3D object thats a primary color using the fingered gripper
+8. pick the one object using the right arm
+9. pick any two objects using the left arm
+10.pick only one object that doesn't have a vertex
+11.pick the closest thing to frisbee
+12.pick a couple of 2D objects
+13.pick an object that looks like a ball of bubblegum
+14.pick something that can be described by the term 'radius'
+15.dont pick anything 

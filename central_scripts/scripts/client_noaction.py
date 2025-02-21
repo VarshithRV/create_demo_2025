@@ -28,29 +28,29 @@ DROP_POSE.pose.orientation.z= 0.007889737191896513
 DROP_POSE.pose.orientation.w= 0.008127542614487311
 
 PLACE_POSE1 = PoseStamped()
+PLACE_POSE1.pose.position.x = 0.14780993448100951
+PLACE_POSE1.pose.position.y = 0.39015564774658973
+PLACE_POSE1.pose.position.z = 0.05
 PLACE_POSE2 = PoseStamped()
-PLACE_POSE3 = PoseStamped()
-PLACE_POSE4 = PoseStamped()
-PLACE_POSE5 = PoseStamped()
-PLACE_POSE6 = PoseStamped()
-PLACE_POSE6.pose.position.x = 0.14780993448100951
-PLACE_POSE6.pose.position.y = 0.39015564774658973
-PLACE_POSE6.pose.position.z = 0.035
 PLACE_POSE2.pose.position.x = 0.14780993448100951
 PLACE_POSE2.pose.position.y = 0.32015564774658973
-PLACE_POSE2.pose.position.z =  0.035
+PLACE_POSE2.pose.position.z =  0.05
+PLACE_POSE3 = PoseStamped()
 PLACE_POSE3.pose.position.x = 0.07026579762831908
 PLACE_POSE3.pose.position.y = 0.39015564774658973
-PLACE_POSE3.pose.position.z = 0.035
+PLACE_POSE3.pose.position.z = 0.05
+PLACE_POSE4 = PoseStamped()
 PLACE_POSE4.pose.position.x = 0.07026579762831908
 PLACE_POSE4.pose.position.y = 0.32015564774658973
-PLACE_POSE4.pose.position.z = 0.035
+PLACE_POSE4.pose.position.z = 0.05
+PLACE_POSE5 = PoseStamped()
 PLACE_POSE5.pose.position.x = -0.02224517915011924
 PLACE_POSE5.pose.position.y = 0.39015564774658973
-PLACE_POSE5.pose.position.z = 0.035
-PLACE_POSE1.pose.position.x = -0.02224517915011924
-PLACE_POSE1.pose.position.y = 0.32015564774658973
-PLACE_POSE1.pose.position.z = 0.035
+PLACE_POSE5.pose.position.z = 0.05
+PLACE_POSE6 = PoseStamped()
+PLACE_POSE6.pose.position.x = -0.02224517915011924
+PLACE_POSE6.pose.position.y = 0.32015564774658973
+PLACE_POSE6.pose.position.z = 0.05
 
 PLACE_POSES = [PLACE_POSE1,PLACE_POSE2,PLACE_POSE3,PLACE_POSE4,PLACE_POSE5,PLACE_POSE6]
 #################################
@@ -350,8 +350,8 @@ if __name__ == "__main__":
         }
         action_list_right.append(action_parsed)
     
-    input("Press Enter to continue ...")
-    central_client.execute_actions_right(action_list_right)
-    central_client.execute_actions_left(action_list_left)
-    # confusing extra comment
+    # input("Press Enter to continue ...")
+    # central_client.execute_actions_right(action_list_right)
+    # central_client.execute_actions_left(action_list_left)
+    # # confusing extra comment
     rospy.loginfo(f"Total execution time is {rospy.Time.now()-time}")
