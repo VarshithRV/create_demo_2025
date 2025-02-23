@@ -23,7 +23,7 @@ from geometry_msgs.msg import WrenchStamped, Twist
 FT_SETPOINT = 2 # force torque set point to indicate pickup
 ERROR_ALLOWANCE = 1.0 # force torque condition error allowance, do not use
 OBJECT_CLEARANCE = 0.03 # pre force torque based vel controller height for pickup
-PRESWIPE_HEIGHT = 0.06 # pre force torque based vel controller height for swiping
+PRESWIPE_HEIGHT = 0.25 # pre force torque based vel controller height for swiping
 VELOCITY_Z = -0.015 # force torque velocity for touch
 VELOCITY_X = 0.01 # swipe velocity
 PADDING_X = 0.02 # padding for x for swiping area
@@ -290,7 +290,7 @@ class Motion_planner:
 
     def execute_waypoints(self, waypoints):
         rospy.loginfo("#################################")
-        rospy.loginfo("Waypoints : %s", waypoints)
+        # rospy.loginfo("Waypoints : %s", waypoints)
 
         # plan a cartesian path
         try : 
@@ -341,6 +341,9 @@ class Motion_planner:
         rospy.loginfo("Swipe started with stain_pose : %s", stain_pose)
         rospy.loginfo("bounding box (x1y1 -> x2y2) : %s %s", x_min_y_min, x_max_y_max)
 
+        x_max_y_max_ref = copy.deepcopy(x_max_y_max)
+        x_min_y_min_ref = copy.deepcopy(x_min_y_min)
+
         # check if location is to right or left and getting and start and end poses
         start_swipe = Pose()
         end_swipe = Pose()
@@ -360,17 +363,16 @@ class Motion_planner:
             print("Velocity : ", swipe_velocity)
 
         if stain_pose.pose.position.x < 0: # the dust is to the left, swipe left
-            start_swipe = x_min_y_min.pose
-            start_swipe.position.x = x_max_y_max.pose.position.x
+            start_swipe = x_max_y_max.pose
+            start_swipe.position.y = x_min_y_min.pose.position.y
             start_swipe.position.z = PRESWIPE_HEIGHT
             start_swipe.orientation = stain_pose.pose.orientation
             end_swipe = x_min_y_min.pose
-            end_swipe.position.y = x_min_y_min.pose.position.y
             end_swipe.position.z = PRESWIPE_HEIGHT
-            start_swipe.orientation = stain_pose.pose.orientation
+            end_swipe.orientation = stain_pose.pose.orientation
             swipe_velocity = -VELOCITY_X
             print("the object is to the left")
-            print("start pose ; ",start_swipe)
+            print("start swipe ; ",start_swipe)
             print("stain_pose ; ",stain_pose.pose)
             print("end_swipe : ",end_swipe)
             print("Velocity : ", swipe_velocity)
@@ -381,28 +383,35 @@ class Motion_planner:
         self.execute_waypoints(waypoints)
 
         # Start swiping
-        while self.move_group.get_current_pose().pose.position.y < x_max_y_max.pose.position.y:
+        print("Target Y : ",x_max_y_max.pose.position.y)
+        while self.move_group.get_current_pose().pose.position.y < x_max_y_max_ref.pose.position.y:
             # go to start swipe
             print("shwiping")
+            print("Current y : ",self.move_group.get_current_pose().pose.position.y)
+            print("Target y : ",x_max_y_max.pose.position.y)
+            print("Target ` y : ",x_max_y_max_ref.pose.position.y)
             waypoints = []
-            waypoints.append(copy.deepcopy(self.move_group.get_current_pose()))
+            waypoints.append(copy.deepcopy((self.move_group.get_current_pose()).pose))
             waypoints.append(copy.deepcopy(start_swipe))
             self.execute_waypoints(waypoints=waypoints)
             # touch at start swipe
-            self.touch_ft_feedback()
+            # self.touch_ft_feedback()
 
             # swipe now, left or right based on stain_pose.position
-            if stain_pose.pose.position.x < 0:
-                self.swipe_left(end_swipe.position.x)
-            if stain_pose.pose.position.x > 0:
-                self.swipe_right(end_swipe.position.x)
+            # if stain_pose.pose.position.x < 0:
+            #     self.swipe_left(end_swipe.position.x)
+            # if stain_pose.pose.position.x > 0:
+            #     self.swipe_right(end_swipe.position.x)
 
             waypoints = []
-            waypoints.append(copy.deepcopy(self.move_group.get_current_pose()))
+            waypoints.append(copy.deepcopy((self.move_group.get_current_pose()).pose))
             waypoints.append(copy.deepcopy(end_swipe))
             start_swipe.position.y += Y_STEP
             end_swipe.position.y += Y_STEP
             waypoints.append(copy.deepcopy(start_swipe))
+            print("Current y : ",self.move_group.get_current_pose().pose.position.y)
+            print("Target y : ",x_max_y_max.pose.position.y)
+            print("Target ` y : ",x_max_y_max_ref.pose.position.y)
             self.execute_waypoints(waypoints=waypoints)
         return True
 

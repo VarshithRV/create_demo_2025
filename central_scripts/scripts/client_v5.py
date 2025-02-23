@@ -31,29 +31,17 @@ DROP_POSE.pose.orientation.w= 0.008127542614487311
 PLACE_POSE1 = PoseStamped()
 PLACE_POSE2 = PoseStamped()
 PLACE_POSE3 = PoseStamped()
-PLACE_POSE4 = PoseStamped()
-PLACE_POSE5 = PoseStamped()
-PLACE_POSE6 = PoseStamped()
-PLACE_POSE6.pose.position.x = 0.14780993448100951
-PLACE_POSE6.pose.position.y = 0.39015564774658973
-PLACE_POSE6.pose.position.z = 0.035
-PLACE_POSE2.pose.position.x = 0.14780993448100951
-PLACE_POSE2.pose.position.y = 0.32015564774658973
-PLACE_POSE2.pose.position.z =  0.035
-PLACE_POSE3.pose.position.x = 0.07026579762831908
-PLACE_POSE3.pose.position.y = 0.39015564774658973
-PLACE_POSE3.pose.position.z = 0.035
-PLACE_POSE4.pose.position.x = 0.07026579762831908
-PLACE_POSE4.pose.position.y = 0.32015564774658973
-PLACE_POSE4.pose.position.z = 0.035
-PLACE_POSE5.pose.position.x = -0.02224517915011924
-PLACE_POSE5.pose.position.y = 0.39015564774658973
-PLACE_POSE5.pose.position.z = 0.035
-PLACE_POSE1.pose.position.x = -0.02224517915011924
-PLACE_POSE1.pose.position.y = 0.32015564774658973
-PLACE_POSE1.pose.position.z = 0.035
+PLACE_POSE2.pose.position.x = 0.13381552997254684
+PLACE_POSE2.pose.position.y = 0.3202769453344135
+PLACE_POSE2.pose.position.z =  0.06
+PLACE_POSE3.pose.position.x = 0.08572452954511882
+PLACE_POSE3.pose.position.y = 0.3183363641462778
+PLACE_POSE3.pose.position.z = 0.06
+PLACE_POSE1.pose.position.x = 0.0517663805624668
+PLACE_POSE1.pose.position.y = 0.312468799179199
+PLACE_POSE1.pose.position.z = 0.06
 
-PLACE_POSES = [PLACE_POSE1,PLACE_POSE2,PLACE_POSE3,PLACE_POSE4,PLACE_POSE5,PLACE_POSE6]
+PLACE_POSES = [PLACE_POSE1,PLACE_POSE2,PLACE_POSE3]
 #################################
 
 #### Define pick place orientation #######
@@ -293,10 +281,10 @@ if __name__ == "__main__":
     central_client = CentralClient()
     rospy.sleep(0.1)
     
-    prompt = central_client.get_prompt_from_voice()
-    rospy.loginfo("Got prompt %s", prompt)
-    # prompt = input("Enter the prompt : ")
+    # prompt = central_client.get_prompt_from_voice()
+    prompt = input("Enter the prompt : ")
     # prompt = "pick the green rectangle using the left arm"
+    rospy.loginfo("Got prompt %s", prompt)
 
     set_io_client = rospy.ServiceProxy("/left/ur_hardware_interface/set_io", SetIO)
     set_io_client(1, 13, 1)
@@ -340,7 +328,7 @@ if __name__ == "__main__":
         source_object_id = object_id
         source_object_position = response.result.object_position[object_id].pose
         label = response.result.object_position[object_id].Class
-        destination_object_position = PLACE_POSES[i%6]
+        destination_object_position = PLACE_POSES[i%3]
         i += 1
         source_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
         destination_object_position.pose.orientation = LEFT_ORIENTATION_POSE.pose.orientation
@@ -355,7 +343,7 @@ if __name__ == "__main__":
         source_object_id = object_id
         source_object_position = response.result.object_position[object_id].pose
         label = response.result.object_position[object_id].Class
-        destination_object_position = PLACE_POSES[i%6]
+        destination_object_position = PLACE_POSES[i%3]
         i += 1 
         source_object_position.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
         destination_object_position.pose.orientation = RIGHT_ORIENTATION_POSE.pose.orientation
@@ -366,7 +354,7 @@ if __name__ == "__main__":
         }
         action_list_right.append(action_parsed)
     
-    input("Press Enter to continue ...")
+    # input("Press Enter to continue ...")
     central_client.execute_actions_right(action_list_right)
     central_client.execute_actions_left(action_list_left)
     # confusing extra comment

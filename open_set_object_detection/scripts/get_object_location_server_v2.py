@@ -179,7 +179,10 @@ class Deprojection:
             object_position.Class = phrases[i]
             x_center = int((xyxy[i][0] + xyxy[i][2]) / 2) + x_min
             y_center = int((xyxy[i][1] + xyxy[i][3]) / 2) + y_min
-            pose = self.get_3d_position(x_center, y_center, depth_image=self.left_depth_image, camera_info=self.left_camera_info, camera_model=self.left_camera_model, depth_threshold=self.left_depth_threshold)
+            left_depth_image = self.left_depth_image
+            mask = (left_depth_image == 0).astype(np.uint8)
+            filled_left_depth_image = cv2.inpaint(left_depth_image, mask, inpaintRadius=3, flags=cv2.INPAINT_NS)
+            pose = self.get_3d_position(x_center, y_center, depth_image=left_depth_image, camera_info=self.left_camera_info, camera_model=self.left_camera_model, depth_threshold=self.left_depth_threshold)
             if pose is None:
                 pass
             object_position.pose = pose
@@ -187,10 +190,10 @@ class Deprojection:
             object_position.y_min = xyxy[i][1] + y_min
             object_position.x_max = xyxy[i][2] + x_min
             object_position.y_max = xyxy[i][3] + y_min
-            object_position.x_min_y_min = self.get_3d_position(object_position.x_max, object_position.y_min, depth_image=self.left_depth_image, camera_info=self.left_camera_info, camera_model=self.left_camera_model, depth_threshold=self.left_depth_threshold)
+            object_position.x_min_y_min = self.get_3d_position(object_position.x_max, object_position.y_min, depth_image=left_depth_image, camera_info=self.left_camera_info, camera_model=self.left_camera_model, depth_threshold=self.left_depth_threshold)
             if object_position.x_min_y_min is None:
                 pass
-            object_position.x_max_y_max = self.get_3d_position(object_position.x_min, object_position.y_max, depth_image=self.left_depth_image, camera_info=self.left_camera_info, camera_model=self.left_camera_model, depth_threshold=self.left_depth_threshold)
+            object_position.x_max_y_max = self.get_3d_position(object_position.x_min, object_position.y_max, depth_image=left_depth_image, camera_info=self.left_camera_info, camera_model=self.left_camera_model, depth_threshold=self.left_depth_threshold)
             if object_position.x_max_y_max is None:
                 pass
             result.object_position.append(object_position)
