@@ -10,4 +10,6 @@
         </include>
     </group>
     <include file="$(find open_set_object_detection)/launch/right_arm_rs_435_extrinsic.launch"/>
+    <param name="/right/rs_435_right/depth_ws_threshold" type="double" value="1000.0" />
+    <node pkg="open_set_object_detection" type="right_435i_camera_workspace_publisher.py" name="right_camera_workspace_publisher" output="screen" />
 </launch>

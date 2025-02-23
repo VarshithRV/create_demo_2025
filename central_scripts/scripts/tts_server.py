@@ -39,7 +39,7 @@ def speak(text, pause_duration=1):
     time.sleep(pause_duration)
 
 def get_microphone_index():
-    mic_index = 4
+    mic_index = 6
     for i in range(audio.get_device_count()):
         dev = audio.get_device_info_by_index(i)
         print(f"Device {i}: {dev['name']}")
