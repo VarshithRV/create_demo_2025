@@ -98,7 +98,6 @@ class DepthOverlayNode:
         color_image = cv2.cvtColor(self.color_image, cv2.COLOR_BGR2RGB)
 
         # Overlay red color on the mask
-        color_image[mask] = [255, 0, 0]  # Red for high depth or NaN
 
         # Compute the bounding box of non-red workspace
         self.compute_workspace_bbox(mask)
@@ -107,6 +106,14 @@ class DepthOverlayNode:
         if None not in (self.x_min, self.x_max, self.y_min, self.y_max):
             cv2.rectangle(color_image, (self.x_min, self.y_min), (self.x_max, self.y_max), (0, 0, 255), 2)
 
+        # Apply inpainting to fill NaN values in the depth image
+        inpainted_depth_image = cv2.inpaint(self.depth_image.astype(np.uint8), np.isnan(self.depth_image).astype(np.uint8), 3, cv2.INPAINT_NS)
+
+        # Update the mask with the inpainted depth image
+        mask = (inpainted_depth_image > self.depth_threshold)
+        
+        color_image[mask] = [255, 0, 0]  # Red for high depth or NaN
+        
         # Convert back to ROS Image message
         overlay_msg = self.bridge.cv2_to_imgmsg(color_image, encoding="rgb8")
 

@@ -302,7 +302,7 @@ if __name__ == "__main__":
     rospy.sleep(0.2)
     rospy.loginfo("Calling the perception now")
     response = central_client.get_object_locations()
-    rospy.loginfo(f"Perception finished in time : {rospy.Time.now() - time}")
+    # rospy.loginfo(f"Perception finished in time : {rospy.Time.now() - time}")
     time1 = rospy.Time.now()
     set_io_client(1, 12, 0)
     # printing the object id and corresponding classes
@@ -314,7 +314,7 @@ if __name__ == "__main__":
     # save response.result.object_position.image
     annotated_image = cv_bridge.CvBridge().imgmsg_to_cv2(response.result.image, desired_encoding="bgr8")
     cv2.imwrite("/home/barracuda/catkin_ws/src/create_2025_demo/central_scripts/scripts/object_image.png", annotated_image)
-    print("Objects detected in time : ", rospy.Time.to_sec(rospy.Time.now()-time))
+    # print("Objects detected in time : ", rospy.Time.to_sec(rospy.Time.now()-time))
     time2 = rospy.Time.now()
     plan_actions = central_client.llm(prompt,response.result.object_position,annotated_image)
     object_list_left = plan_actions["pick_using_left_arm"]
@@ -357,5 +357,9 @@ if __name__ == "__main__":
     # input("Press Enter to continue ...")
     central_client.execute_actions_right(action_list_right)
     central_client.execute_actions_left(action_list_left)
+
+    central_client.left_move_look_client.send_goal(move_preaction_goal)
+    central_client.left_move_look_client.wait_for_result()
+
     # confusing extra comment
-    rospy.loginfo(f"Total execution time is {rospy.Time.now()-time}")
+    # rospy.loginfo(f"Total execution time is {rospy.Time.now()-time}")
